@@ -27,12 +27,22 @@ function Header() {
             <li>
               <NavLink to ='/support' className={({ isActive }) => isActive ? 'active' : ''}>Support</NavLink>
             </li>
-            <li>
-              {/* <NavLink to ='/login' className={({ isActive }) => isActive ? 'active' : ''}>Login</NavLink>
+            {/* <li>
+              <NavLink to ='/login' className={({ isActive }) => isActive ? 'active' : ''}>Login</NavLink>
             </li>
             <li>
-              <NavLink to ='/signup' className={({ isActive }) => isActive ? 'active' : ''}>Signup</NavLink> */}
-            </li>
+              <NavLink to ='/signup' className={({ isActive }) => isActive ? 'active' : ''}>Signup</NavLink>
+            </li> */}
+            
+          </ul>
+        </div>
+        
+        <div className='RoutingLinks'>
+          {/* <NavLink to='/login' className='login'>Login</NavLink>
+          <NavLink to='/signup' className='signup'>Signup</NavLink> */}
+          <ul>
+            <li><NavLink to='/login' className='login'>Login</NavLink></li>
+            <li><NavLink to='/signup' className='signup'>Signup</NavLink></li>
           </ul>
         </div>
 
