@@ -17,12 +17,10 @@ const userSchema = new mongoose.Schema({
     },
     latitude:Number,
     longitude:Number,
-    
-    
-
-    
+    role:["User","Vendor","Admin"]
+  
 },{
     timestamps:true
 })
 
-export const User= mongoose.model("User",userSchema.schema)
+export const User= mongoose.model("User",userSchema)
