@@ -7,17 +7,22 @@ const userSchema = new mongoose.Schema({
     },
     email:{
         type:String,
-        require:true, 
+        required:true, 
+        unique:true
     },phone:{
         type:Number,
-        require:true, 
+        required:true, 
     },password:{
         type:String,
-        require:true, 
+        required:true, 
     },
     latitude:Number,
     longitude:Number,
-    role:["User","Vendor","Admin"]
+    role:{
+        type:String,
+        enum:["User","Admin","Vendor"],
+        default:"User"
+    }
   
 },{
     timestamps:true
