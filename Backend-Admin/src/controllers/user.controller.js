@@ -35,10 +35,10 @@ const registerUser= asyncHandler(async(req,res)=>{
     const user =await User.create({
         name,
         email,
-        
         latitude,
         longitude,
-        role
+        role,
+        refreshToken
 
     })
 })
@@ -67,4 +67,4 @@ const loginUser=asyncHandler(async(req,res)=>{
 })
 
 
-export {registerUser}
+export {registerUser,loginUser}
