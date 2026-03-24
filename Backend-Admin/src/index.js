@@ -1,5 +1,5 @@
 import express from "express"
-import connectDB from "./DbConfig/MongoDb.js";
+import connectDB from "./config/mongo.config.js";
 import dotenv from "dotenv"
 dotenv.config()
 const app = express();
