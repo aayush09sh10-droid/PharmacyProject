@@ -22,10 +22,15 @@ const userSchema = new mongoose.Schema({
         type:String,
         enum:["User","Admin","Vendor"],
         default:"User"
+    },
+    refreshToken:{
+        type:String,
+
     }
   
 },{
     timestamps:true
-})
+});
+
 
 export const User= mongoose.model("User",userSchema)

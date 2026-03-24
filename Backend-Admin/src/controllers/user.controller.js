@@ -3,6 +3,21 @@ import { ApiError } from "../utils/apiError";
 import { asyncHandler } from "../utils/asyncHandler.util";
 import router from "../routes/user.routes";
 
+const generateAccessAndRefreshToken=async(userId)=>{
+    try {
+        const user =await User.findOne(userId);
+        const accessToken=user.generateAccessToken();
+        const refreshToken=user.generateRefreshToken();
+        user.refreshToken=refreshToken;
+        await user.save({validateBeforeSave});
+        return{accessToken,refreshToken}
+        
+    } catch (error) {
+        throw new ApiError (500,"Something went wrong")
+        
+    }
+}
+
 
 const registerUser= asyncHandler(async(req,res)=>{
     const {name,email,password,latitude,longitude,role}=req.body
