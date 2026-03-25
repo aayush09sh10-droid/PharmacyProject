@@ -6,7 +6,7 @@ import { ApiResponse } from "../utils/apiResponse.js";
 
 const generateAccessAndRefreshToken=async(userId)=>{
     try {
-        const user =await User.findOne(userId);
+        const user =await User.findById(userId);
         const accessToken=user.generateAccessToken();
         const refreshToken=user.generateRefreshToken();
         user.refreshToken=refreshToken;
@@ -21,7 +21,7 @@ const generateAccessAndRefreshToken=async(userId)=>{
 
 
 const registerUser= asyncHandler(async(req,res)=>{
-    const {name,email,password,latitude,longitude,role}=req.body
+    const {name,email,password,latitude,longitude,role,userName}=req.body
     if(
         [name,email,password].some((field=>field?.trim()===""))
     ){
@@ -36,7 +36,7 @@ const registerUser= asyncHandler(async(req,res)=>{
     const user =await User.create({
         name,
         email,
-        
+        userName,
         latitude,
         longitude,
         role,
@@ -58,13 +58,10 @@ const loginUser=asyncHandler(async(req,res)=>{
     //password match hash
     //login name exist?
     const {name,password,email}=req.body
-    if (!name || !email){
+    if (!password || !email || !name){
         throw new ApiError(400,"user not exist")
     }
-    const user= await User.findOne({
-        $or:[{name},{email}]
-
-    })
+    const user= await User.findOne({email}).select("+password")
     if(!user){
         throw new ApiError(400,"User not found")
 
@@ -76,7 +73,7 @@ const loginUser=asyncHandler(async(req,res)=>{
     const {accessToken,refreshToken}=await generateAccessAndRefreshToken(user._id)
     const loggedInUser=await User.findById(user._id).select("-password -refreshToken")
     const option= {
-        httpsOnly:true,
+        httpOnly:true,
         secure:true,
 
     }
@@ -90,7 +87,7 @@ const loginUser=asyncHandler(async(req,res)=>{
     
 })
 const logoutUser=asyncHandler(async(req,res)=>{
-    User.findUserAndUpdate(
+    User.findByIdAndUpdate(
         req.user._id,{
             $set:{
                 refreshToken:undefined
