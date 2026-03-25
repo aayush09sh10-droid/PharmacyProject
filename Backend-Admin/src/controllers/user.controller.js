@@ -1,8 +1,8 @@
-import { User } from "../models/user.model";
-import { ApiError } from "../utils/apiError";
-import { asyncHandler } from "../utils/asyncHandler.util";
-import router from "../routes/user.routes";
-import { ApiResponse } from "../utils/apiResponse";
+import { User } from "../models/user.model.js";
+import { ApiError } from "../utils/apiError.js";
+import { asyncHandler } from "../utils/asyncHandler.util.js";
+import router from "../routes/user.routes.js";
+import { ApiResponse } from "../utils/apiResponse.js";
 
 const generateAccessAndRefreshToken=async(userId)=>{
     try {
@@ -36,6 +36,7 @@ const registerUser= asyncHandler(async(req,res)=>{
     const user =await User.create({
         name,
         email,
+        
         latitude,
         longitude,
         role,
@@ -115,4 +116,4 @@ const getProfile = asyncHandler(async (req, res) => {
 })
 
 
-export {registerUser,loginUser,logoutUser,getprofile}
+export {registerUser,loginUser,logoutUser,getProfile}

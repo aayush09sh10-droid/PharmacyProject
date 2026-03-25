@@ -1,7 +1,8 @@
 import express from "express"
-import { loginUser,registerUser,logoutUser } from "../controllers/user.controller"
+import { loginUser,registerUser,logoutUser } from "../controllers/user.controller.js"
 import { Router } from "express"
-import { verifyJWT } from "../middlewares/auth.middleware"
+import { verifyJWT } from "../middlewares/auth.middleware.js"
+
 
 
 // register Controller Route
