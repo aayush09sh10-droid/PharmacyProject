@@ -20,7 +20,7 @@ app.use(morgan("dev"));
 app.get("/",(req,res)=>{
     res.send("Backend is running")
 })
-import router from "./src/routes/user.routes";
+import router from "./routes/user.routes";
 
 app.use("/api/v1/users",router)
 export default app
