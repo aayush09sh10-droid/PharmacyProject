@@ -7,14 +7,18 @@ import { ApiResponse } from "../utils/apiResponse.js";
 const generateAccessAndRefreshToken=async(userId)=>{
     try {
         const user =await User.findById(userId);
+        if(!user){
+            throw new ApiError(400,"User not found")
+        }
         const accessToken=user.generateAccessToken();
         const refreshToken=user.generateRefreshToken();
         user.refreshToken=refreshToken;
-        await user.save({validateBeforeSave});
+        await user.save({validateBeforeSave:false});
         return{accessToken,refreshToken}
         
     } catch (error) {
-        throw new ApiError (500,"Something went wrong")
+        console.log("Error:",error.message)
+        throw error;
         
     }
 }
@@ -57,8 +61,9 @@ const loginUser=asyncHandler(async(req,res)=>{
     //get data 
     //password match hash
     //login name exist?
+    
     const {name,password,email}=req.body
-    if (!password || !email || !name){
+    if (!password || !email ){
         throw new ApiError(400,"user not exist")
     }
     const user= await User.findOne({email}).select("+password")
@@ -78,11 +83,14 @@ const loginUser=asyncHandler(async(req,res)=>{
 
     }
     return res.status(200)
+    .cookie("accessToken",accessToken,option)
+    .cookie("refreshToken",refreshToken,option)
     
     .json(new ApiResponse(200,
         {user:loggedInUser,accessToken},
         "User logged in"
     ))
+    
 
     
 })
@@ -98,7 +106,7 @@ const logoutUser=asyncHandler(async(req,res)=>{
         }
     )
     const option={
-        httpsOnly:true,
+        httpOnly:true,
         secure:true
     }
     return res.status(200)
