@@ -88,6 +88,26 @@ const loginUser=asyncHandler(async(req,res)=>{
 
     
 })
+const logoutUser=asyncHandler(async(req,res)=>{
+    User.findUserAndUpdate(
+        req.user._id,{
+            $set:{
+                refreshToken:undefined
+            }
+        },
+        {
+            new :true
+        }
+    )
+    const option={
+        httpsOnly:true,
+        secure:true
+    }
+    return res.status(200)
+    .clearCookie("accessToken",option)
+    .clearCookie("refreshToken",option)
+    .json(new ApiResponse(200,"User Loggedout"))
+})
 const getProfile = asyncHandler(async (req, res) => {
     return res.status(200).json({
         user: req.user
@@ -95,4 +115,4 @@ const getProfile = asyncHandler(async (req, res) => {
 })
 
 
-export {registerUser,loginUser,getProfile}
+export {registerUser,loginUser,logoutUser,getprofile}
