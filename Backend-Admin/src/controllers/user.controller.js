@@ -72,6 +72,19 @@ const loginUser=asyncHandler(async(req,res)=>{
     if(!isPasswordValid){
         throw new ApiError(400,"Password incorrect")
     }
+    const {accessToken,refreshToken}=await generateAccessAndRefreshToken(user._id)
+    const loggedInUser=await User.findById(user._id).select("-password -refreshToken")
+    const option= {
+        httpsOnly:true,
+        secure:true,
+
+    }
+    return res.status(200)
+    
+    .json(new ApiResponse(200,
+        {user:loggedInUser,accessToken},
+        "User logged in"
+    ))
 
     
 })
