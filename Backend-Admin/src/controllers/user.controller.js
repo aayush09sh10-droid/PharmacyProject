@@ -2,6 +2,7 @@ import { User } from "../models/user.model";
 import { ApiError } from "../utils/apiError";
 import { asyncHandler } from "../utils/asyncHandler.util";
 import router from "../routes/user.routes";
+import { ApiResponse } from "../utils/apiResponse";
 
 const generateAccessAndRefreshToken=async(userId)=>{
     try {
@@ -38,9 +39,18 @@ const registerUser= asyncHandler(async(req,res)=>{
         latitude,
         longitude,
         role,
-        refreshToken
+        password,
+
 
     })
+    const createdUsername=await User.findById(user._id).select("-password -refreshToken")
+    if(!createdUsername){
+        throw new ApiError(500,"Something went wrong")
+    }
+    return res.status(201).json(
+        new ApiResponse(201,"User Registered",createdUsername)
+    )
+
 })
 const loginUser=asyncHandler(async(req,res)=>{
     //get data 
