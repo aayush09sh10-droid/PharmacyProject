@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import FormContainer from "../../Components/Login/FormContainer";
-import PageHeader from "../../Components/Login/PageHeader";
-import DemoBox from "../../Components/Login/DemoBox";
-import InputField from "../../Components/Login/InputField";
-import SubmitButton from "../../Components/Login/SubmitButton";
+import FormContainer from "./FormContainer";
+import PageHeader from "./PageHeader";
+import DemoBox from "./DemoBox";
+import InputField from "./InputField";
+import SubmitButton from "./SubmitButton";
 import VendorIcon from "../../Assets/vendor.png";
 
 export default function VendorLogin() {

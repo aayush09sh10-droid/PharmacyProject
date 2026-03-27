@@ -1,13 +1,19 @@
-import { useState } from 'react'
-import OuterLogin from './components/OuterLogin.jsx'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import LoginOuter from './Components/loginOuter.jsx'
+import VendorLogin from './Components/Login/VendorLogin.jsx'
+import CustomerLogin from './Components/Login/CustomerLogin.jsx'
+import AdminLogin from './Components/Login/AdminLogin.jsx'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <OuterLogin />
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginOuter />} />
+        <Route path="/vendor-login" element={<VendorLogin />} />
+        <Route path="/customer-login" element={<CustomerLogin />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+      </Routes>
+    </Router>
   )
 }
 

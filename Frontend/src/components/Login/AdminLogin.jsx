@@ -1,13 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import FormContainer from "../../Components/Login/FormContainer";
-import PageHeader from "../../Components/Login/PageHeader";
-import DemoBox from "../../Components/Login/DemoBox";
-import InputField from "../../Components/Login/InputField";
-import SubmitButton from "../../Components/Login/SubmitButton";
-import CustomerIcon from "../../Assets/Customer.png";
+import FormContainer from "./FormContainer";
+import PageHeader from "./PageHeader";
+import DemoBox from "./DemoBox";
+import InputField from "./InputField";
+import SubmitButton from "./SubmitButton";
+import AdminIcon from "../../Assets/Admin.png";
 
-export default function CustomerLogin() {
+export default function AdminLogin() {
   const navigate = useNavigate();
 
   const handleBackClick = () => {
@@ -15,7 +15,7 @@ export default function CustomerLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 py-10">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-purple-100 py-10">
       <FormContainer>
         
         {/* Back Button */}
@@ -27,14 +27,14 @@ export default function CustomerLogin() {
         </div>
 
         <PageHeader
-          icon={CustomerIcon}
-          title="Customer Login"
-          subtitle="Order medicines online"
+          icon={AdminIcon}
+          title="Admin Login"
+          subtitle="Manage the platform"
         />
 
         <DemoBox
-          email="customer@demo.com"
-          password="customer123"
+          email="admin@demo.com"
+          password="admin123"
         />
 
         <InputField
