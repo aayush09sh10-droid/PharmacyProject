@@ -1,5 +1,24 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, NavLink, Route, Routes, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  ShieldCheck,
+  Users,
+  Store,
+  ShoppingBag,
+  DollarSign,
+  BarChart3,
+} from "lucide-react";
+
+const menuItems = [
+  { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
+  { name: "Vendor Verification", icon: ShieldCheck, path: "verification" },
+  { name: "Users", icon: Users, path: "users" },
+  { name: "Vendors", icon: Store, path: "vendors" },
+  { name: "Orders", icon: ShoppingBag, path: "orders" },
+  { name: "Payments", icon: DollarSign, path: "payments" },
+  { name: "Reports", icon: BarChart3, path: "reports" },
+];
 
 const stats = [
   { label: "Active Users", value: "12.4K", change: "+8.2%" },
@@ -7,6 +26,80 @@ const stats = [
   { label: "Orders Today", value: "1,284", change: "+5.4%" },
   { label: "Revenue", value: "$48.2K", change: "+9.7%" },
 ];
+
+function Sidebar() {
+  return (
+    <div className="w-54 h-screen bg-white border-r flex flex-col">
+      <div className="px-4 py-6 border-b">
+        <h1 className="text-lg font-semibold">Admin Portal</h1>
+        <p className="text-sm text-gray-500">Admin</p>
+
+        <div className="mt-4 bg-purple-100 text-purple-700 rounded-full px-3 py-1 text-sm font-medium w-fit">
+          Super Admin
+        </div>
+      </div>
+
+      <div className="flex flex-col mt-4 gap-2 px-3">
+        {menuItems.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={index}
+              to={`/admin-dashboard/${item.path}`}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
+                  isActive
+                    ? "bg-linear-to-r from-purple-500 to-indigo-500 text-white shadow"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`
+              }
+            >
+              <Icon size={20} />
+              {item.name}
+            </NavLink>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({ adminName }) {
+  return (
+    <section className="space-y-6">
+      <div className="rounded-3xl bg-linear-to-r from-slate-900 via-slate-800 to-indigo-900 p-8 text-white shadow-lg">
+        <h1 className="mt-3 text-3xl font-semibold">Welcome back, {adminName}</h1>
+        <p className="mt-2 max-w-2xl text-sm text-slate-200">
+          Platform administration and management in one place.
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat) => (
+          <article
+            key={stat.label}
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <p className="text-sm text-slate-500">{stat.label}</p>
+            <h2 className="mt-3 text-3xl font-semibold text-slate-900">{stat.value}</h2>
+            <p className="mt-2 text-sm font-medium text-emerald-600">{stat.change} this week</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PlaceholderPage({ title }) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+      <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+      <p className="mt-2 text-sm text-slate-500">
+        This section is ready for the next component to be connected.
+      </p>
+    </div>
+  );
+}
 
 export default function AdminPage() {
   const [adminName, setAdminName] = useState("");
@@ -29,40 +122,21 @@ export default function AdminPage() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
-      <div className="flex flex-col md:flex-row min-h-screen">
-        <aside className="w-full md:w-72 bg-white border-r border-slate-200 p-6">
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-slate-900">Admin Portal</h2>
-            <p className="text-sm text-slate-500 mt-1">Super Admin</p>
-          </div>
-
-          <nav className="space-y-2">
-            {["Dashboard", "Vendor Verification", "Users", "Vendors", "Orders", "Payments", "Reports"].map((item) => (
-              <div key={item} className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 bg-slate-50">
-                {item}
-              </div>
-            ))}
-          </nav>
-        </aside>
-
-        <main className="flex-1 p-6 md:p-10">
-          <div className="rounded-3xl bg-white p-8 shadow-sm mb-8">
-            <h1 className="text-3xl font-semibold text-slate-900">Welcome, {adminName}</h1>
-            <p className="mt-3 text-slate-500">You are now logged in as an administrator.</p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {stats.map((stat) => (
-              <article key={stat.label} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p className="text-sm text-slate-500">{stat.label}</p>
-                <h2 className="mt-3 text-3xl font-semibold text-slate-900">{stat.value}</h2>
-                <p className="mt-2 text-sm font-medium text-emerald-600">{stat.change} this week</p>
-              </article>
-            ))}
-          </div>
-        </main>
-      </div>
+    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+      <Sidebar />
+      <main className="flex-1 p-6 md:p-8">
+        <Routes>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard adminName={adminName} />} />
+          <Route path="verification" element={<PlaceholderPage title="Vendor Verification" />} />
+          <Route path="users" element={<PlaceholderPage title="Users" />} />
+          <Route path="vendors" element={<PlaceholderPage title="Vendors" />} />
+          <Route path="orders" element={<PlaceholderPage title="Orders" />} />
+          <Route path="payments" element={<PlaceholderPage title="Payments" />} />
+          <Route path="reports" element={<PlaceholderPage title="Reports" />} />
+          <Route path="*" element={<Navigate to="dashboard" replace />} />
+        </Routes>
+      </main>
     </div>
   );
 }
