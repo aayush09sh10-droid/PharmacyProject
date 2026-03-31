@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function InputField({ label, type = "text", placeholder, icon }) {
+export default function InputField({ label, type = "text", placeholder, icon, value, onChange, name, autoComplete }) {
 
   const [show, setShow] = useState(false);
 
@@ -16,6 +16,10 @@ export default function InputField({ label, type = "text", placeholder, icon }) 
 
         <input
           type={actualType}
+          name={name}
+          value={value}
+          onChange={onChange}
+          autoComplete={autoComplete}
           placeholder={placeholder}
           className="bg-transparent outline-none w-full text-gray-700"
         />

@@ -5,7 +5,7 @@ import PageHeader from "./PageHeader";
 import DemoBox from "./DemoBox";
 import InputField from "./InputField";
 import SubmitButton from "./SubmitButton";
-import VendorIcon from "../../Assets/vendor.png";
+import VendorIcon from "../../assets/vendor.png";
 
 export default function VendorLogin() {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function VendorLogin() {
     navigate("/");
   };
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 py-10">
+    <div className="min-h-screen bg-linear-to-b from-green-50 to-green-100 py-10">
 
       <FormContainer>
         
@@ -55,7 +55,10 @@ export default function VendorLogin() {
 
         <p className="text-center mt-4 text-gray-600">
           Want to list your pharmacy?{" "}
-          <span className="text-green-600 font-medium cursor-pointer">
+          <span
+            className="text-green-600 font-medium cursor-pointer hover:underline"
+            onClick={() => navigate('/register')}
+          >
             Register as Vendor
           </span>
         </p>

@@ -1,8 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import LoginOuter from './Components/loginOuter.jsx'
-import VendorLogin from './Components/Login/VendorLogin.jsx'
-import CustomerLogin from './Components/Login/CustomerLogin.jsx'
-import AdminLogin from './Components/Login/AdminLogin.jsx'
+import LoginOuter from './components/loginOuter.jsx'
+import VendorLogin from './components/Login/VendorLogin.jsx'
+import CustomerLogin from './components/Login/CustomerLogin.jsx'
+import AdminLogin from './components/Login/AdminLogin.jsx'
+import Register from './components/Login/Register.jsx'
+import AdminPage from './components/AdminPage.jsx'
 
 function App() {
   return (
@@ -12,6 +14,8 @@ function App() {
         <Route path="/vendor-login" element={<VendorLogin />} />
         <Route path="/customer-login" element={<CustomerLogin />} />
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/admin-dashboard" element={<AdminPage />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   )

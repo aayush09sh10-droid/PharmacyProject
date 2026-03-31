@@ -62,11 +62,11 @@ userSchema.methods.generateAccessToken=function(){
         role:this.role
 
     },
-process.env.ACCESS_TOKEN_SECRET,
-{
-    expiresIn:process.env.ACCESS_TOKEN_EXPIRY,
-}
-)
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY || process.env.ACCESS_TOKEN_ENTRY || "1d",
+    }
+    )
 }
 userSchema.methods.generateRefreshToken=function(){
     return jwt.sign({
@@ -74,11 +74,10 @@ userSchema.methods.generateRefreshToken=function(){
 
     },
         process.env.REFRESH_TOKEN_SECRET,
+    {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY || "10d"
 
-{
-    expiresIn:process.env.REFRESH_TOKEN_EXPIRY
-
-})
+    })
 }
 
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Users from "../Assets/Users.png";
-import Admin from "../Assets/Admin.png";
-import Vendor from "../Assets/Vendor.png";
-import Customer from "../Assets/Customer.png";
+import Users from "../assets/Users.png";
+import Admin from "../assets/Admin.png";
+import Vendor from "../assets/Vendor.png";
+import Customer from "../assets/Customer.png";
 import RoleCard from './RoleCard.jsx';
 import './loginOuter.css';
 
@@ -26,7 +26,7 @@ const LoginOuter = () => {
             title="I am a Customer"
             description="Order medicines from verified pharmacies near you\nBrowse medicines\nCompare prices\nTrack orders"
             btnText="Continue as Customer"
-            btnColor="bg-gradient-to-r from-blue-500 via-blue-700 to-blue-500"
+            btnColor="bg-linear-to-r from-blue-500 via-blue-700 to-blue-500"
             onClick={() => navigate('/customer-login')}
           />
           <RoleCard
@@ -34,7 +34,7 @@ const LoginOuter = () => {
             title="I am a Pharmacy Vendor"
             description="List your pharmacy on our platform\nManage inventory\nReceive orders\nConnect with customers"
             btnText="Login as Vendor"
-            btnColor="bg-gradient-to-r from-green-500 via-green-600 to-green-400"
+            btnColor="bg-linear-to-r from-green-500 via-green-600 to-green-400"
             onClick={() => navigate('/vendor-login')}
           />
           <RoleCard
@@ -42,7 +42,7 @@ const LoginOuter = () => {
             title="I am an Admin"
             description="Manage users and pharmacies\nMonitor platform activity\nView analytics\nSystem configuration"
             btnText="Login as Admin"
-            btnColor="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-400"
+            btnColor="bg-linear-to-r from-purple-500 via-purple-600 to-purple-400"
             onClick={() => navigate('/admin-login')}
           />
         </div>

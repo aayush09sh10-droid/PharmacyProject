@@ -32,6 +32,7 @@ const registerUser= asyncHandler(async(req,res)=>{
         throw new ApiError(400,"All compulsory fields are required")
     }
 
+    const normalizedUserName = userName?.trim() || `${name.toLowerCase().replace(/\s+/g, "")}-${Date.now()}`;
 
     const existedUser=await User.findOne({$or:[{name},{email}]})
     if(existedUser){
@@ -40,7 +41,7 @@ const registerUser= asyncHandler(async(req,res)=>{
     const user =await User.create({
         name,
         email,
-        userName,
+        userName: normalizedUserName,
         latitude,
         longitude,
         role,
@@ -53,7 +54,7 @@ const registerUser= asyncHandler(async(req,res)=>{
         throw new ApiError(500,"Something went wrong")
     }
     return res.status(201).json(
-        new ApiResponse(201,"User Registered",createdUsername)
+        new ApiResponse(201, createdUsername, "User Registered")
     )
 
 })

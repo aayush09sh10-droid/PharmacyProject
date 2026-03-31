@@ -26,7 +26,7 @@ const LoginOuter = () => {
                 Compare prices
                 Track orders`}
                 btnText="Continue as Customer"
-                btnColor="bg-gradient-to-r from-blue-500 via-blue-700 to-blue-500"
+                btnColor="bg-linear-to-r from-blue-500 via-blue-700 to-blue-500"
             />
 
             <OuterLoginCard
@@ -38,7 +38,7 @@ const LoginOuter = () => {
               Receive orders
               Connect with customers`}
               btnText="Login as Vendor"
-              btnColor="bg-gradient-to-r from-green-500 via-green-600 to-green-400"
+              btnColor="bg-linear-to-r from-green-500 via-green-600 to-green-400"
             />
 
             <OuterLoginCard
@@ -51,7 +51,7 @@ const LoginOuter = () => {
                 Ensure smooth operations`
               }
               btnText="Continue as Admin"
-              btnColor="bg-gradient-to-r from-purple-500 via-purple-700 to-purple-500"
+              btnColor="bg-linear-to-r from-purple-500 via-purple-700 to-purple-500"
             />
 
         </div>
