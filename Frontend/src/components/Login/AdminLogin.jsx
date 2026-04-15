@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/auth.service.js";
+import { loginUser, saveAuthSession } from "../../services/auth.service.js";
 import FormContainer from "./FormContainer";
 import PageHeader from "./PageHeader";
 import DemoBox from "./DemoBox";
@@ -29,8 +29,7 @@ export default function AdminLogin() {
       if (data.user.role !== "Admin") {
         throw new Error("Please login with an admin account.");
       }
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("accessToken", data.accessToken);
+      saveAuthSession(data);
       navigate("/admin-dashboard");
     } catch (err) {
       setError(err.message || "Login failed");

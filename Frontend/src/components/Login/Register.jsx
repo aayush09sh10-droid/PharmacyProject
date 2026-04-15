@@ -16,9 +16,12 @@ export default function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [success, setSuccess] = useState("");
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!name || !email || !password || !confirmPassword) {
       setError("Please fill out all fields.");
@@ -38,7 +41,8 @@ export default function Register() {
         password,
         role: "Admin",
       });
-      navigate("/admin-login");
+      setSuccess("Registration successful! Redirecting to login...");
+      setTimeout(() => navigate("/admin-login"), 1800);
     } catch (err) {
       setError(err.message || "Registration failed");
     } finally {
@@ -69,7 +73,7 @@ export default function Register() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="John Doe"
+            placeholder="Full name"
             icon="👤"
             autoComplete="name"
           />
@@ -111,6 +115,7 @@ export default function Register() {
         </form>
 
         {error && <p className="text-center mt-3 text-sm text-red-600">{error}</p>}
+        {success && <p className="text-center mt-3 text-sm text-green-600">{success}</p>}
 
         <p className="text-center mt-4 text-gray-600">
           Already have an account?{" "}

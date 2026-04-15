@@ -8,7 +8,9 @@ import {
   ShoppingBag,
   DollarSign,
   BarChart3,
+  LogOut,
 } from "lucide-react";
+import { clearAuthSession, logoutUser } from "../services/auth.service.js";
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
@@ -27,7 +29,7 @@ const stats = [
   { label: "Revenue", value: "$48.2K", change: "+9.7%" },
 ];
 
-function Sidebar() {
+function Sidebar({ onLogout, isLoggingOut }) {
   return (
     <div className="w-54 h-screen bg-white border-r flex flex-col">
       <div className="px-4 py-6 border-b">
@@ -59,6 +61,18 @@ function Sidebar() {
             </NavLink>
           );
         })}
+      </div>
+
+      <div className="mt-auto border-t px-3 py-4">
+        <button
+          type="button"
+          onClick={onLogout}
+          disabled={isLoggingOut}
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          <LogOut size={20} />
+          {isLoggingOut ? "Logging out..." : "Logout"}
+        </button>
       </div>
     </div>
   );
@@ -103,6 +117,7 @@ function PlaceholderPage({ title }) {
 
 export default function AdminPage() {
   const [adminName, setAdminName] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -121,9 +136,23 @@ export default function AdminPage() {
     setAdminName(user.name || "Admin");
   }, [navigate]);
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      clearAuthSession();
+      navigate("/admin-login", { replace: true });
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-900">
-      <Sidebar />
+      <Sidebar onLogout={handleLogout} isLoggingOut={isLoggingOut} />
       <main className="flex-1 p-6 md:p-8">
         <Routes>
           <Route index element={<Navigate to="dashboard" replace />} />

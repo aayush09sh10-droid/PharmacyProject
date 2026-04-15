@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const AUTH_STORAGE_KEYS = ["user", "accessToken"];
 
 async function handleResponse(response) {
   const text = await response.text();
@@ -43,4 +44,29 @@ async function registerUser(payload) {
   return handleResponse(response);
 }
 
-export { loginUser, registerUser };
+async function logoutUser() {
+  const token = localStorage.getItem("accessToken");
+  const headers = {};
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}/api/v1/users/logout`, {
+    method: "POST",
+    headers,
+  });
+
+  return handleResponse(response);
+}
+
+function saveAuthSession(data) {
+  localStorage.setItem("user", JSON.stringify(data.user));
+  localStorage.setItem("accessToken", data.accessToken);
+}
+
+function clearAuthSession() {
+  AUTH_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+}
+
+export { clearAuthSession, loginUser, logoutUser, registerUser, saveAuthSession };

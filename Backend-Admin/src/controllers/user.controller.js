@@ -96,8 +96,9 @@ const loginUser=asyncHandler(async(req,res)=>{
     
 })
 const logoutUser=asyncHandler(async(req,res)=>{
-    User.findByIdAndUpdate(
-        req.user._id,{
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
             $set:{
                 refreshToken:undefined
             }
@@ -113,7 +114,7 @@ const logoutUser=asyncHandler(async(req,res)=>{
     return res.status(200)
     .clearCookie("accessToken",option)
     .clearCookie("refreshToken",option)
-    .json(new ApiResponse(200,"User Loggedout"))
+    .json(new ApiResponse(200,{},"User logged out"))
 })
 const getProfile = asyncHandler(async (req, res) => {
     return res.status(200).json({

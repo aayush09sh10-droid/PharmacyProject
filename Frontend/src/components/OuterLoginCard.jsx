@@ -1,6 +1,6 @@
 import React from "react";
 
-const OuterLoginCard = ({ image, title, description, btnText, btnColor }) => {
+const OuterLoginCard = ({ image, title, description, btnText, btnColor, onClick }) => {
     return (
         <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-100 transition-all duration-300 h-100 transform hover:scale-105 hover:shadow-2xl">
 
@@ -21,6 +21,8 @@ const OuterLoginCard = ({ image, title, description, btnText, btnColor }) => {
 
             {/* Button */}
             <button
+                type="button"
+                onClick={onClick}
                 className={`mt-6 px-4 py-2 rounded-lg text-white font-medium transition-all duration-300 w-full ${btnColor}`}
             >
                 {btnText}
