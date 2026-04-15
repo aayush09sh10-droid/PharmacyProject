@@ -26,3 +26,4 @@ const giveRequestOfVerification = asyncHandler(async (req, res) => {
     );
 });
 
+export {giveRequestOfVerification}

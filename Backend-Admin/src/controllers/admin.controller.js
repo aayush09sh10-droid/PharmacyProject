@@ -20,4 +20,4 @@ const approveVendorVerification = asyncHandler(async (req, res) => {
     );
 });
 
-export { giveRequestOfVerification, approveVendorVerification };
+export { approveVendorVerification };
