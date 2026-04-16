@@ -1,8 +1,8 @@
-import { User } from "../../../../Backend-Admin/src/models/user.model";
-import { ApiError } from "../../../../Backend-Admin/src/utils/apiError";
-import { ApiResponse } from "../../../../Backend-Admin/src/utils/apiResponse";
-import { asyncHandler } from "../../../../Backend-Admin/src/utils/asyncHandler.util";
-import {Vendor} from "../models/vendor.model";
+// import { User } from "../../../../Backend-Admin/src/models/user.model";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import {Vendor} from "../models/vendor.model.js";
 
 
 const giveRequestOfVerification = asyncHandler(async (req, res) => {

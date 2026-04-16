@@ -19,8 +19,8 @@ const fetchVendor = asyncHandler(async()=>{
 })
 
 
-const approveVendorVerification = asyncHandler(async (req, res) => {
-    const {vendorId }=req.params;
+// const approveVendorVerification = asyncHandler(async (req, res) => {
+//     const {vendorId }=req.params;
     
 //     const { vendorId } = req.params;
     
@@ -39,6 +39,6 @@ const approveVendorVerification = asyncHandler(async (req, res) => {
 // });
 
 
-})
+// })
 
-export { approveVendorVerification, fetchVendor };
+export {  fetchVendor };
