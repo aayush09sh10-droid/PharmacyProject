@@ -31,6 +31,12 @@ const vendorSchema = new Schema(
         },
         refreshToken: {
             type: String
+        },
+        status:{
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            default: "pending"
+
         }
     },
     {
