@@ -6,12 +6,14 @@ import AdminLogin from './components/Login/AdminLogin.jsx'
 import Register from './components/Login/Register.jsx'
 import AdminPage from './components/AdminPage.jsx'
 import LandingPage from './components/LandingPage.jsx'
+import AboutPage from './components/AboutPage.jsx'
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/signin" element={<LoginOuter />} />
         <Route path="/vendor-login" element={<VendorLogin />} />
         <Route path="/customer-login" element={<CustomerLogin />} />

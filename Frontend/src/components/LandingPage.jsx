@@ -1,93 +1,11 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Bot,
-  CircleHelp,
-  HeartPulse,
-  Home,
-  LogIn,
-  MapPin,
-  Menu,
-  Search,
-  ShoppingCart,
-  Sparkles,
-} from "lucide-react";
-
-function NavItem({ icon: Icon, label, active = false }) {
-  return (
-    <button
-      type="button"
-      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-        active
-          ? "bg-emerald-50 text-emerald-700"
-          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-      }`}
-    >
-      <Icon size={16} />
-      <span>{label}</span>
-    </button>
-  );
-}
+import { MapPin, Search, Sparkles } from "lucide-react";
+import PharmaHeader from "./PharmaHeader.jsx";
 
 export default function LandingPage() {
-  const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-[#f4fbf9] text-slate-900">
-      <header className="sticky top-0 z-10 border-b border-emerald-100 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-200">
-              <HeartPulse size={20} />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold leading-none text-emerald-700">
-                PharmaCare
-              </h1>
-              <p className="mt-1 text-xs text-slate-500">Your Health Partner</p>
-            </div>
-          </div>
-
-          <nav className="hidden items-center gap-2 lg:flex">
-            <NavItem icon={Home} label="Home" active />
-            <NavItem icon={CircleHelp} label="About" />
-            <NavItem icon={CircleHelp} label="Support" />
-            <NavItem icon={Bot} label="AI Assistant" />
-          </nav>
-
-          <div className="hidden items-center gap-3 md:flex">
-            <button
-              type="button"
-              onClick={() => navigate("/signin")}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-            >
-              <LogIn size={16} />
-              <span>Login</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/signin")}
-              className="rounded-full bg-linear-to-r from-emerald-500 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:opacity-95"
-            >
-              Sign Up
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border border-amber-300 px-4 py-2 text-sm font-medium text-amber-700 transition hover:bg-amber-50"
-            >
-              <ShoppingCart size={16} />
-              <span>Cart</span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-600 md:hidden"
-          >
-            <Menu size={18} />
-          </button>
-        </div>
-      </header>
+      <PharmaHeader activePage="home" />
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <section className="overflow-hidden rounded-[24px] bg-linear-to-r from-[#06c48d] via-[#08b084] to-[#04986c] p-6 text-white shadow-[0_25px_60px_rgba(6,196,141,0.22)] sm:p-8 lg:p-10">
