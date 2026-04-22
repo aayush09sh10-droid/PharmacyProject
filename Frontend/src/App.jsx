@@ -10,6 +10,7 @@ import AdminPage from './components/AdminPage.jsx'
 import LandingPage from './components/Home/LandingPage.jsx'
 import AboutPage from './components/Home/AboutPage.jsx'
 import CartPage from './components/Shop/CartPage.jsx'
+import VendorPortal from './components/VendorPortal.jsx'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/signin" element={<LoginOuter mode="login" />} />
         <Route path="/register" element={<LoginOuter mode="register" />} />
         <Route path="/vendor-login" element={<VendorLogin />} />
+        <Route path="/vendor-dashboard/*" element={<VendorPortal />} />
         <Route path="/customer-login" element={<CustomerLogin />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/customer-register" element={<CustomerRegister />} />

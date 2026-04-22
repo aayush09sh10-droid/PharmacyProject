@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginVendor, saveVendorSession } from "../../services/vendor.service.js";
 import FormContainer from "./FormContainer";
 import PageHeader from "./PageHeader";
 import DemoBox from "./DemoBox";
@@ -14,10 +15,33 @@ export default function VendorLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setMessage("Vendor login UI is ready. Backend connection will be added soon.");
+    setError("");
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const data = await loginVendor(email, password);
+      saveVendorSession(data);
+
+      if (data.vendor.status !== "approved") {
+        setMessage(
+          data.vendor.status === "rejected"
+            ? "Your vendor account has been rejected. Please contact admin support."
+            : "Your vendor account is pending admin approval. You can sign in and track the approval status.",
+        );
+      }
+
+      navigate("/vendor-dashboard");
+    } catch (err) {
+      setError(err.message || "Vendor login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,9 +83,10 @@ export default function VendorLogin() {
               autoComplete="current-password"
             />
 
-            <SubmitButton text="Sign In" />
+            <SubmitButton text={loading ? "Signing in..." : "Sign In"} />
           </form>
 
+          {error && <p className="mt-3 text-center text-sm text-red-600">{error}</p>}
           {message && <p className="mt-3 text-center text-sm text-green-600">{message}</p>}
 
           <p className="mt-4 text-center text-gray-600">

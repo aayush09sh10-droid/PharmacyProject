@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   X,
 } from "lucide-react";
+import { clearAuthSession, getStoredUser, logoutUser } from "../../services/auth.service.js";
 
 function NavItem({ icon: Icon, label, active = false, onClick }) {
   return (
@@ -36,6 +37,14 @@ export default function PharmaHeader({
 }) {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    setCurrentUser(getStoredUser());
+  }, []);
+
+  const customerUser =
+    currentUser?.role === "User" ? currentUser : showCustomerMenu ? { name: "Customer" } : null;
 
   const primaryNavItems = [
     {
@@ -80,6 +89,19 @@ export default function PharmaHeader({
   const handleNavigate = (callback) => {
     callback();
     setIsMobileMenuOpen(false);
+  };
+
+  const handleCustomerLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      clearAuthSession();
+      setCurrentUser(null);
+      setIsMobileMenuOpen(false);
+      navigate("/", { replace: true });
+    }
   };
 
   return (
@@ -145,17 +167,23 @@ export default function PharmaHeader({
         </button>
 
         <div className="hidden items-center gap-3 sm:flex">
-          {showCustomerMenu ? (
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700 shadow-sm"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
-                C
+          {customerUser ? (
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700 shadow-sm">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
+                  {(customerUser.name || "C").charAt(0).toUpperCase()}
+                </div>
+                <span>{customerUser.name || "Customer"}</span>
+                <ChevronDown size={16} />
               </div>
-              <span>Customer</span>
-              <ChevronDown size={16} />
-            </button>
+              <button
+                type="button"
+                onClick={handleCustomerLogout}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Logout
+              </button>
+            </div>
           ) : (
             <>
               <button
@@ -238,17 +266,23 @@ export default function PharmaHeader({
         </div>
 
         <div className="border-b border-slate-200 px-4 py-5">
-          {showCustomerMenu ? (
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
-                C
+          {customerUser ? (
+            <div className="space-y-3">
+              <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
+                  {(customerUser.name || "C").charAt(0).toUpperCase()}
+                </div>
+                <span>{customerUser.name || "Customer"}</span>
+                <ChevronDown size={16} />
               </div>
-              <span>Customer</span>
-              <ChevronDown size={16} />
-            </button>
+              <button
+                type="button"
+                onClick={handleCustomerLogout}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Logout
+              </button>
+            </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <button

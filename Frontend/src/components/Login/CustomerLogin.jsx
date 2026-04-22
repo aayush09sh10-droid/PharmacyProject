@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/auth.service.js";
+import { loginUser, saveAuthSession } from "../../services/auth.service.js";
 import FormContainer from "./FormContainer";
 import PageHeader from "./PageHeader";
 import DemoBox from "./DemoBox";
@@ -27,8 +27,7 @@ export default function CustomerLogin() {
       if (data.user.role !== "User") {
         throw new Error("Please login with a customer account.");
       }
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("accessToken", data.accessToken);
+      saveAuthSession(data);
       navigate("/");
     } catch (err) {
       setError(err.message || "Login failed");

@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8005";
 const AUTH_STORAGE_KEYS = ["user", "accessToken"];
 
 async function handleResponse(response) {
@@ -18,6 +18,28 @@ async function handleResponse(response) {
   }
 
   return body.data;
+}
+
+function normalizeSessionPayload(data) {
+  if (data?.user) {
+    return {
+      user: data.user,
+      accessToken: data.accessToken,
+    };
+  }
+
+  if (data?.vendor) {
+    return {
+      user: {
+        ...data.vendor,
+        role: "Vendor",
+        name: data.vendor.ownerName || data.vendor.pharmacyName,
+      },
+      accessToken: data.accessToken,
+    };
+  }
+
+  return data;
 }
 
 async function loginUser(email, password) {
@@ -61,12 +83,38 @@ async function logoutUser() {
 }
 
 function saveAuthSession(data) {
-  localStorage.setItem("user", JSON.stringify(data.user));
-  localStorage.setItem("accessToken", data.accessToken);
+  const normalized = normalizeSessionPayload(data);
+  localStorage.setItem("user", JSON.stringify(normalized.user));
+  localStorage.setItem("accessToken", normalized.accessToken);
+}
+
+function getStoredUser() {
+  const rawUser = localStorage.getItem("user");
+
+  if (!rawUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawUser);
+  } catch (error) {
+    clearAuthSession();
+    return null;
+  }
 }
 
 function clearAuthSession() {
   AUTH_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
 }
 
-export { clearAuthSession, loginUser, logoutUser, registerUser, saveAuthSession };
+export {
+  API_URL,
+  clearAuthSession,
+  getStoredUser,
+  handleResponse,
+  loginUser,
+  logoutUser,
+  normalizeSessionPayload,
+  registerUser,
+  saveAuthSession,
+};

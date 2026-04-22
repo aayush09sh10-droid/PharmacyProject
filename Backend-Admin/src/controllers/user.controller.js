@@ -1,7 +1,6 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.util.js";
-import router from "../routes/user.routes.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 
 const generateAccessAndRefreshToken=async(userId)=>{
@@ -26,26 +25,30 @@ const generateAccessAndRefreshToken=async(userId)=>{
 
 const registerUser= asyncHandler(async(req,res)=>{
     const {name,email,password,latitude,longitude,role,userName}=req.body
+    const normalizedName = name?.trim();
+    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedPassword = password?.trim();
+
     if(
-        [name,email,password].some((field=>field?.trim()===""))
+        [normalizedName,normalizedEmail,normalizedPassword].some((field)=>!field)
     ){
         throw new ApiError(400,"All compulsory fields are required")
     }
 
-    const normalizedUserName = userName?.trim() || `${name.toLowerCase().replace(/\s+/g, "")}-${Date.now()}`;
+    const normalizedUserName = userName?.trim() || `${normalizedName.toLowerCase().replace(/\s+/g, "")}-${Date.now()}`;
 
-    const existedUser=await User.findOne({$or:[{name},{email}]})
+    const existedUser=await User.findOne({ email: normalizedEmail })
     if(existedUser){
-        throw new ApiError(409,"User already existed")
+        throw new ApiError(409,"An account with this email already exists")
     }
     const user =await User.create({
-        name,
-        email,
+        name: normalizedName,
+        email: normalizedEmail,
         userName: normalizedUserName,
         latitude,
         longitude,
         role,
-        password,
+        password: normalizedPassword,
 
 
     })
@@ -63,16 +66,18 @@ const loginUser=asyncHandler(async(req,res)=>{
     //password match hash
     //login name exist?
     
-    const {name,password,email}=req.body
-    if (!password || !email ){
-        throw new ApiError(400,"user not exist")
+    const {password,email}=req.body
+    const normalizedEmail = email?.trim().toLowerCase();
+
+    if (!password?.trim() || !normalizedEmail ){
+        throw new ApiError(400,"Email and password are required")
     }
-    const user= await User.findOne({email}).select("+password")
+    const user= await User.findOne({email: normalizedEmail}).select("+password")
     if(!user){
         throw new ApiError(400,"User not found")
 
     }
-    const isPasswordValid=await user.isPasswordCorrect(password)
+    const isPasswordValid=await user.isPasswordCorrect(password.trim())
     if(!isPasswordValid){
         throw new ApiError(400,"Password incorrect")
     }
@@ -80,7 +85,7 @@ const loginUser=asyncHandler(async(req,res)=>{
     const loggedInUser=await User.findById(user._id).select("-password -refreshToken")
     const option= {
         httpOnly:true,
-        secure:true,
+        secure:process.env.NODE_ENV === "production",
 
     }
     return res.status(200)
@@ -109,7 +114,7 @@ const logoutUser=asyncHandler(async(req,res)=>{
     )
     const option={
         httpOnly:true,
-        secure:true
+        secure:process.env.NODE_ENV === "production"
     }
     return res.status(200)
     .clearCookie("accessToken",option)
@@ -121,6 +126,19 @@ const getProfile = asyncHandler(async (req, res) => {
         user: req.user
     })
 })
+const deleteUser = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const deletedUser = await User.findByIdAndDelete(id).select("-password -refreshToken");
+
+    if (!deletedUser) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, deletedUser, "User deleted successfully")
+    );
+})
 
 
-export {registerUser,loginUser,logoutUser,getProfile}
+export {registerUser,loginUser,logoutUser,getProfile, deleteUser}

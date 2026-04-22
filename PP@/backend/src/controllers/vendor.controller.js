@@ -32,7 +32,7 @@ const loginVendor = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === "production"
     };
 
     return res
@@ -86,7 +86,41 @@ const registerVendor = asyncHandler(async (req, res) => {
     );
 });
 
+const getAllVendors = asyncHandler(async (req, res) => {
+    const vendors = await Vendor.find().sort({ createdAt: -1 }).select("-password -refreshToken");
+
+    return res.status(200).json(
+        new ApiResponse(200, vendors, "Vendors fetched successfully")
+    );
+});
+
+const approveVendor = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const vendor = await Vendor.findByIdAndUpdate(
+        id,
+        {
+            $set: {
+                status: "approved"
+            }
+        },
+        {
+            new: true
+        }
+    ).select("-password -refreshToken");
+
+    if (!vendor) {
+        throw new ApiError(404, "Vendor not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, vendor, "Vendor approved successfully")
+    );
+});
+
 export {
     loginVendor,
-    registerVendor
+    registerVendor,
+    getAllVendors,
+    approveVendor
 }

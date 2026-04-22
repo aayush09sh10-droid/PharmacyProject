@@ -18,10 +18,9 @@ const PORT = process.env.PORT || 9000;
 // })
 connectDB()
 .then(()=>{
-    app.listen(PORT,()=>{
-        console.log(`Server is running at localhost:${PORT}`)
-
-    })
+    app.listen(8005, "0.0.0.0", () => {
+  console.log("Server is running on network at port 8005");
+});
 }).catch((err) => {
     console.log("DB connection error ", err);
 });

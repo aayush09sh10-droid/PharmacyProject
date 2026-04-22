@@ -1,85 +1,82 @@
-import axios from "axios"
-import { asyncHandler } from "../utils/asyncHandler.util.js";
+import axios from "axios";
 import { ApiError } from "../utils/apiError.js";
 
-const VENDOR_BASE_URL = "http://localhost:8001/api";
-const getAllVendors = async ()=>{
-    try {
-        const response = await axios.get(`${VENDOR_BASE_URL}/vednor`);
-        return response.data;
+const API_ROOT = process.env.VENDOR_API_ROOT || "http://localhost:8001/api/v1";
+const VENDOR_BASE_URL = `${API_ROOT}/vendors`;
+const ORDER_BASE_URL = `${API_ROOT}/orders`;
+const DASHBOARD_BASE_URL = `${API_ROOT}/dashboard`;
 
-        
-    } catch (error) {
+const internalHeaders = () => ({
+  "x-api-key": process.env.INTERNAL_API_KEY,
+});
 
-        console.error("Error fetching vendor:");
+const wrapVendorError = (error, fallbackMessage) => {
+  throw new ApiError(
+    error.response?.status || 500,
+    error.response?.data?.message || fallbackMessage,
+  );
+};
 
-        throw error;
-        
+const isNetworkFailure = (error) =>
+  error.code === "ECONNREFUSED" ||
+  error.code === "ENOTFOUND" ||
+  error.code === "ECONNRESET" ||
+  error.message?.includes("connect") ||
+  error.message?.includes("Network");
+
+const getAllVendors = async () => {
+  try {
+    const response = await axios.get(VENDOR_BASE_URL, {
+      headers: internalHeaders(),
+    });
+
+    return response.data.data ?? [];
+  } catch (error) {
+    if (isNetworkFailure(error)) {
+      return [];
     }
+    wrapVendorError(error, "Failed to fetch vendors");
+  }
+};
 
-}
+const approveVendor = async (vendorId) => {
+  try {
+    const response = await axios.patch(
+      `${VENDOR_BASE_URL}/${vendorId}/approve`,
+      {},
+      {
+        headers: internalHeaders(),
+      },
+    );
 
-const approveVendor = asyncHandler(async(vendorId)=>{
-    try {
-        const response = await axios.patch(
-            `${VENDOR_BASE_URL}/vendor/${vendorId}/verify`,{},
-            {
-                headers:{
-                    "x-api-key":process.env.INTERNAL_API_KEY
-                }
-            }
-        );
-        return response.data;
+    return response.data.data;
+  } catch (error) {
+    wrapVendorError(error, "Failed to approve vendor");
+  }
+};
 
-        
-    } catch (error) {
-       throw new ApiError(
-        error.response?.status || 500,
-        error.response?.data?.message || "failed to verify vedndor"
-       )
-        
+const getAllOrders = async () => {
+  try {
+    const response = await axios.get(ORDER_BASE_URL);
+    return response.data.data ?? [];
+  } catch (error) {
+    if (isNetworkFailure(error)) {
+      return [];
     }
-})
+    wrapVendorError(error, "Failed to fetch orders");
+  }
+};
 
-const getAllMedicines = asyncHandler(async()=>{
-    try {
-        const response = await axios.get(`${VENDOR_BASE_URL}/admin/medicines`,
-            {
-                headers:{
-                    "x-api-key": process.env.INTERNAL_API_KEY
-                }
-            }
-        )
-        
-    } catch (error) {
-        throw new ApiError(
-            error.response?.status || 500,
-            error.response?.data?.message || "Failed to fetch medicines"
-        );
-        
+const getVendorDashboardStats = async () => {
+  try {
+    const response = await axios.get(`${DASHBOARD_BASE_URL}/stats`);
+    return response.data.data ?? {};
+  } catch (error) {
+    if (isNetworkFailure(error)) {
+      return {};
     }
-})
+    wrapVendorError(error, "Failed to fetch dashboard stats");
+  }
+};
 
-const getAnalytics=asyncHandler(async(req,res)=>{
-    try {
-        const response = await axios.get(
-            `${VENDOR_BASE_URL}/admin/analytics`,
-            {
-                headers: {
-                    "x-api-key": process.env.INTERNAL_API_KEY
-                }
-            }
-        );
-        
-    } catch (error) {
-
-        throw new ApiError(
-            error.response?.status || 500,
-            error.response?.data?.message || "Failed to fetch analytics"
-        );
-        
-    }
-})
-
-
-export {getAllVendors,approveVendor,getAllMedicines}
+export { approveVendor, getAllOrders, getAllVendors, getVendorDashboardStats };
