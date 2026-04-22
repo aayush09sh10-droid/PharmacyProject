@@ -16,7 +16,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
 
   const handleBackClick = () => {
-    navigate("/");
+    navigate("/signin");
   };
 
   const handleSubmit = async (event) => {

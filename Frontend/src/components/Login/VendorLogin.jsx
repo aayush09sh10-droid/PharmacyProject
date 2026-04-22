@@ -11,7 +11,7 @@ export default function VendorLogin() {
   const navigate = useNavigate();
 
   const handleBackClick = () => {
-    navigate("/");
+    navigate("/signin");
   };
   return (
     <div className="min-h-screen bg-linear-to-b from-green-50 to-green-100 py-10">

@@ -5,12 +5,14 @@ import CustomerLogin from './components/Login/CustomerLogin.jsx'
 import AdminLogin from './components/Login/AdminLogin.jsx'
 import Register from './components/Login/Register.jsx'
 import AdminPage from './components/AdminPage.jsx'
+import LandingPage from './components/LandingPage.jsx'
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LoginOuter />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/signin" element={<LoginOuter />} />
         <Route path="/vendor-login" element={<VendorLogin />} />
         <Route path="/customer-login" element={<CustomerLogin />} />
         <Route path="/admin-login" element={<AdminLogin />} />
