@@ -7,6 +7,7 @@ import DemoBox from "./DemoBox";
 import InputField from "./InputField";
 import SubmitButton from "./SubmitButton";
 import CustomerIcon from "../../assets/Customer.png";
+import PharmaFooter from "../PharmaFooter.jsx";
 
 export default function CustomerLogin() {
   const navigate = useNavigate();
@@ -40,67 +41,65 @@ export default function CustomerLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-blue-50 to-blue-100 py-10">
-      <FormContainer>
-        {/* Back Button */}
-        <div 
-          className="flex items-center gap-2 text-gray-500 mb-4 cursor-pointer hover:text-gray-700"
-          onClick={handleBackClick}
-        >
-          ← Change Role
-        </div>
-
-        <PageHeader
-          icon={CustomerIcon}
-          title="Customer Login"
-          subtitle="Order medicines online"
-        />
-
-        <DemoBox
-          email="customer@demo.com"
-          password="customer123"
-        />
-
-        <form onSubmit={handleSubmit}>
-          <InputField
-            label="Email Address"
-            type="email"
-            name="email"
-            placeholder="you@example.com"
-            icon="📧"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-          />
-
-          <InputField
-            label="Password"
-            type="password"
-            name="password"
-            placeholder="••••••••"
-            icon="🔒"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-          />
-
-          <SubmitButton text={loading ? "Signing in..." : "Sign In"} />
-        </form>
-
-        {error && (
-          <p className="text-center mt-3 text-sm text-red-600">{error}</p>
-        )}
-
-        <p className="text-center mt-4 text-gray-600">
-          Don't have an account?{" "}
-          <span
-            className="text-blue-600 font-medium cursor-pointer hover:underline"
-            onClick={() => navigate('/register')}
+    <div className="min-h-screen bg-linear-to-b from-blue-50 to-blue-100">
+      <div className="py-10">
+        <FormContainer>
+          <div
+            className="mb-4 flex items-center gap-2 cursor-pointer text-gray-500 hover:text-gray-700"
+            onClick={handleBackClick}
           >
-            Register here
-          </span>
-        </p>
-      </FormContainer>
+            â† Change Role
+          </div>
+
+          <PageHeader
+            icon={CustomerIcon}
+            title="Customer Login"
+            subtitle="Order medicines online"
+          />
+
+          <DemoBox email="customer@demo.com" password="customer123" />
+
+          <form onSubmit={handleSubmit}>
+            <InputField
+              label="Email Address"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              icon="ðŸ“§"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
+
+            <InputField
+              label="Password"
+              type="password"
+              name="password"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+              icon="ðŸ”’"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+            />
+
+            <SubmitButton text={loading ? "Signing in..." : "Sign In"} />
+          </form>
+
+          {error && <p className="mt-3 text-center text-sm text-red-600">{error}</p>}
+
+          <p className="mt-4 text-center text-gray-600">
+            Don't have an account?{" "}
+            <span
+              className="cursor-pointer font-medium text-blue-600 hover:underline"
+              onClick={() => navigate("/register")}
+            >
+              Register here
+            </span>
+          </p>
+        </FormContainer>
+      </div>
+
+      <PharmaFooter />
     </div>
   );
 }

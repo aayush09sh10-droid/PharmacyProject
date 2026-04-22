@@ -11,6 +11,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { clearAuthSession, logoutUser } from "../services/auth.service.js";
+import PharmaFooter from "./PharmaFooter.jsx";
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
@@ -31,17 +32,17 @@ const stats = [
 
 function Sidebar({ onLogout, isLoggingOut }) {
   return (
-    <div className="w-54 h-screen bg-white border-r flex flex-col">
-      <div className="px-4 py-6 border-b">
+    <div className="flex h-screen w-54 flex-col border-r bg-white">
+      <div className="border-b px-4 py-6">
         <h1 className="text-lg font-semibold">Admin Portal</h1>
         <p className="text-sm text-gray-500">Admin</p>
 
-        <div className="mt-4 bg-purple-100 text-purple-700 rounded-full px-3 py-1 text-sm font-medium w-fit">
+        <div className="mt-4 w-fit rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
           Super Admin
         </div>
       </div>
 
-      <div className="flex flex-col mt-4 gap-2 px-3">
+      <div className="mt-4 flex flex-col gap-2 px-3">
         {menuItems.map((item, index) => {
           const Icon = item.icon;
           return (
@@ -49,7 +50,7 @@ function Sidebar({ onLogout, isLoggingOut }) {
               key={index}
               to={`/admin-dashboard/${item.path}`}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
+                `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                   isActive
                     ? "bg-linear-to-r from-purple-500 to-indigo-500 text-white shadow"
                     : "text-gray-600 hover:bg-gray-100"
@@ -153,19 +154,22 @@ export default function AdminPage() {
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-900">
       <Sidebar onLogout={handleLogout} isLoggingOut={isLoggingOut} />
-      <main className="flex-1 p-6 md:p-8">
-        <Routes>
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard adminName={adminName} />} />
-          <Route path="verification" element={<PlaceholderPage title="Vendor Verification" />} />
-          <Route path="users" element={<PlaceholderPage title="Users" />} />
-          <Route path="vendors" element={<PlaceholderPage title="Vendors" />} />
-          <Route path="orders" element={<PlaceholderPage title="Orders" />} />
-          <Route path="payments" element={<PlaceholderPage title="Payments" />} />
-          <Route path="reports" element={<PlaceholderPage title="Reports" />} />
-          <Route path="*" element={<Navigate to="dashboard" replace />} />
-        </Routes>
-      </main>
+      <div className="flex min-h-screen flex-1 flex-col">
+        <main className="flex-1 p-6 md:p-8">
+          <Routes>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard adminName={adminName} />} />
+            <Route path="verification" element={<PlaceholderPage title="Vendor Verification" />} />
+            <Route path="users" element={<PlaceholderPage title="Users" />} />
+            <Route path="vendors" element={<PlaceholderPage title="Vendors" />} />
+            <Route path="orders" element={<PlaceholderPage title="Orders" />} />
+            <Route path="payments" element={<PlaceholderPage title="Payments" />} />
+            <Route path="reports" element={<PlaceholderPage title="Reports" />} />
+            <Route path="*" element={<Navigate to="dashboard" replace />} />
+          </Routes>
+        </main>
+        <PharmaFooter />
+      </div>
     </div>
   );
 }

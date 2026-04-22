@@ -1,6 +1,7 @@
 import React from "react";
 import { MapPin, Search, Sparkles } from "lucide-react";
 import PharmaHeader from "./PharmaHeader.jsx";
+import PharmaFooter from "./PharmaFooter.jsx";
 
 export default function LandingPage() {
   return (
@@ -108,6 +109,8 @@ export default function LandingPage() {
           </article>
         </section>
       </main>
+
+      <PharmaFooter />
     </div>
   );
 }

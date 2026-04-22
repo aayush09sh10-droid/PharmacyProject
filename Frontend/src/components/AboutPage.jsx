@@ -8,6 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import PharmaHeader from "./PharmaHeader.jsx";
+import PharmaFooter from "./PharmaFooter.jsx";
 
 const featureCards = [
   {
@@ -133,6 +134,8 @@ export default function AboutPage() {
           </p>
         </section>
       </main>
+
+      <PharmaFooter />
     </div>
   );
 }
