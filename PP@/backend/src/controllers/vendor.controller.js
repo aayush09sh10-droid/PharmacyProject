@@ -52,6 +52,41 @@ const loginVendor = asyncHandler(async (req, res) => {
         );
 });
 
+const registerVendor = asyncHandler(async (req, res) => {
+    const { email, password, pharmacyName, ownerName, phone } = req.body;
+
+    if (
+        [email, password, pharmacyName, ownerName, phone].some((field) => !field || field?.trim() === "")
+    ) {
+        throw new ApiError(400, "All fields are required");
+    }
+
+    const existedVendor = await Vendor.findOne({ email });
+
+    if (existedVendor) {
+        throw new ApiError(409, "Vendor with this email already exists");
+    }
+
+    const vendor = await Vendor.create({
+        email,
+        password,
+        pharmacyName,
+        ownerName,
+        phone
+    });
+
+    const createdVendor = await Vendor.findById(vendor._id).select("-password -refreshToken");
+
+    if (!createdVendor) {
+        throw new ApiError(500, "Something went wrong while registering the vendor");
+    }
+
+    return res.status(201).json(
+        new ApiResponse(201, createdVendor, "Vendor registered successfully")
+    );
+});
+
 export {
-    loginVendor
+    loginVendor,
+    registerVendor
 }
