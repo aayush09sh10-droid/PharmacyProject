@@ -7,7 +7,8 @@ import DemoBox from "./DemoBox";
 import InputField from "./InputField";
 import SubmitButton from "./SubmitButton";
 import AdminIcon from "../../assets/Admin.png";
-import PharmaFooter from "../PharmaFooter.jsx";
+import PharmaFooter from "../Layout/PharmaFooter.jsx";
+import BackButton from "../Layout/BackButton.jsx";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -15,10 +16,6 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const handleBackClick = () => {
-    navigate("/signin");
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -43,11 +40,8 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-linear-to-b from-purple-50 to-purple-100">
       <div className="py-10">
         <FormContainer>
-          <div
-            className="mb-4 flex items-center gap-2 cursor-pointer text-gray-500 hover:text-gray-700"
-            onClick={handleBackClick}
-          >
-            â† Change Role
+          <div className="mb-4">
+            <BackButton label="Back" onClick={() => navigate("/signin")} />
           </div>
 
           <PageHeader
@@ -64,7 +58,7 @@ export default function AdminLogin() {
               type="email"
               name="email"
               placeholder="you@example.com"
-              icon="ðŸ“§"
+              icon="Mail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
@@ -74,8 +68,8 @@ export default function AdminLogin() {
               label="Password"
               type="password"
               name="password"
-              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-              icon="ðŸ”’"
+              placeholder="Enter password"
+              icon="Lock"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
@@ -89,10 +83,10 @@ export default function AdminLogin() {
           <p className="mt-4 text-center text-gray-600">
             Don't have an account?{" "}
             <span
-              className="cursor-pointer font-medium text-blue-600 hover:underline"
-              onClick={() => navigate("/register")}
+              className="cursor-pointer font-medium text-purple-600 hover:underline"
+              onClick={() => navigate("/admin-register")}
             >
-              Register here
+              Register as Admin
             </span>
           </p>
         </FormContainer>

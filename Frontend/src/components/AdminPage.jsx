@@ -11,7 +11,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { clearAuthSession, logoutUser } from "../services/auth.service.js";
-import PharmaFooter from "./PharmaFooter.jsx";
+import PharmaFooter from "./Layout/PharmaFooter.jsx";
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },

@@ -1,9 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { MapPin, Search, Sparkles } from "lucide-react";
-import PharmaHeader from "./PharmaHeader.jsx";
-import PharmaFooter from "./PharmaFooter.jsx";
+import PharmaHeader from "../Layout/PharmaHeader.jsx";
+import PharmaFooter from "../Layout/PharmaFooter.jsx";
 
 export default function LandingPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(100);
+  const sliderMin = 0;
+  const sliderMax = 100;
+  const minThumbGap = 5;
+  const rangeStart = ((minPrice - sliderMin) / (sliderMax - sliderMin)) * 100;
+  const rangeEnd = ((maxPrice - sliderMin) / (sliderMax - sliderMin)) * 100;
+
   return (
     <div className="min-h-screen bg-[#f4fbf9] text-slate-900">
       <PharmaHeader activePage="home" />
@@ -50,9 +59,10 @@ export default function LandingPage() {
               <Search size={18} className="text-slate-400" />
               <input
                 type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="e.g. Azithromycin, Aspirin, Metformin..."
                 className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-                readOnly
               />
             </div>
             <button
@@ -68,17 +78,49 @@ export default function LandingPage() {
           <h3 className="text-xl font-semibold text-slate-900">Filter by Price Range</h3>
 
           <div className="mt-5 grid gap-4 text-sm text-slate-500 sm:grid-cols-2">
-            <p>Minimum Price: $0</p>
-            <p className="sm:text-right">Maximum Price: $100</p>
+            <p>Minimum Price: ${minPrice}</p>
+            <p className="sm:text-right">Maximum Price: ${maxPrice}</p>
           </div>
 
           <div className="mt-4 space-y-4">
-            <div className="h-2 rounded-full bg-emerald-100">
-              <div className="h-2 w-1/2 rounded-full bg-linear-to-r from-emerald-400 to-teal-400" />
+            <div className="relative h-10">
+              <div className="absolute top-1/2 h-2 w-full -translate-y-1/2 rounded-full bg-emerald-100" />
+              <div
+                className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-linear-to-r from-emerald-400 to-teal-400"
+                style={{
+                  left: `${rangeStart}%`,
+                  width: `${Math.max(rangeEnd - rangeStart, 0)}%`,
+                }}
+              />
+              <input
+                type="range"
+                min={sliderMin}
+                max={sliderMax}
+                value={minPrice}
+                onChange={(event) =>
+                  setMinPrice(
+                    Math.min(Number(event.target.value), maxPrice - minThumbGap),
+                  )
+                }
+                className="pointer-events-none absolute left-0 top-1/2 z-20 h-10 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:mt-[-6px] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-emerald-500 [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-track]:h-2 [&::-moz-range-track]:bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-emerald-500 [&::-moz-range-thumb]:shadow-md"
+              />
+              <input
+                type="range"
+                min={sliderMin}
+                max={sliderMax}
+                value={maxPrice}
+                onChange={(event) =>
+                  setMaxPrice(
+                    Math.max(Number(event.target.value), minPrice + minThumbGap),
+                  )
+                }
+                className="pointer-events-none absolute left-0 top-1/2 z-10 h-10 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:mt-[-6px] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-emerald-500 [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-track]:h-2 [&::-moz-range-track]:bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-emerald-500 [&::-moz-range-thumb]:shadow-md"
+              />
             </div>
             <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-700">
-              Tip: Showing medicines priced between <span className="font-semibold">$0</span>{" "}
-              and <span className="font-semibold">$100</span>
+              Tip: Showing medicines priced between{" "}
+              <span className="font-semibold">${minPrice}</span> and{" "}
+              <span className="font-semibold">${maxPrice}</span>
             </div>
           </div>
         </section>

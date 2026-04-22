@@ -7,8 +7,10 @@ import {
   Shield,
   Users,
 } from "lucide-react";
-import PharmaHeader from "./PharmaHeader.jsx";
-import PharmaFooter from "./PharmaFooter.jsx";
+import { useNavigate } from "react-router-dom";
+import PharmaHeader from "../Layout/PharmaHeader.jsx";
+import PharmaFooter from "../Layout/PharmaFooter.jsx";
+import BackButton from "../Layout/BackButton.jsx";
 
 const featureCards = [
   {
@@ -42,11 +44,17 @@ const stats = [
 ];
 
 export default function AboutPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-[#f8fbff] text-slate-900">
       <PharmaHeader activePage="about" />
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <BackButton label="Back to Home" onClick={() => navigate("/")} />
+        </div>
+
         <section className="mx-auto max-w-3xl text-center">
           <h2 className="text-4xl font-semibold text-slate-900">About PharmaCare</h2>
           <p className="mt-5 text-lg leading-8 text-slate-600">

@@ -1,18 +1,34 @@
 import { useState } from "react";
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 
-export default function InputField({ label, type = "text", placeholder, icon, value, onChange, name, autoComplete }) {
+const iconMap = {
+  Lock,
+  Mail,
+  User,
+};
 
+export default function InputField({
+  label,
+  type = "text",
+  placeholder,
+  icon,
+  value,
+  onChange,
+  name,
+  autoComplete,
+}) {
   const [show, setShow] = useState(false);
-
   const actualType = type === "password" && show ? "text" : type;
+  const IconComponent = iconMap[icon];
 
   return (
     <div className="mb-5 w-full text-left">
-      <label className="block mb-2 text-gray-700 font-medium">{label}</label>
+      <label className="mb-2 block font-medium text-gray-700">{label}</label>
 
-      <div className="flex items-center bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 shadow-sm focus-within:border-green-500 transition">
-        
-        <span className="text-gray-400 text-xl mr-3">{icon}</span>
+      <div className="flex items-center rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 shadow-sm transition focus-within:border-green-500">
+        <span className="mr-3 text-gray-400">
+          {IconComponent ? <IconComponent size={18} /> : icon}
+        </span>
 
         <input
           type={actualType}
@@ -21,16 +37,17 @@ export default function InputField({ label, type = "text", placeholder, icon, va
           onChange={onChange}
           autoComplete={autoComplete}
           placeholder={placeholder}
-          className="bg-transparent outline-none w-full text-gray-700"
+          className="w-full bg-transparent text-gray-700 outline-none"
         />
 
         {type === "password" && (
-          <span
-            className="text-gray-400 text-xl cursor-pointer"
+          <button
+            type="button"
+            className="text-gray-400"
             onClick={() => setShow(!show)}
           >
-            {show ? "👁️" : "👁️‍🗨️"}
-          </span>
+            {show ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         )}
       </div>
     </div>

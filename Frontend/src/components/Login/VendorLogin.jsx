@@ -1,29 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FormContainer from "./FormContainer";
 import PageHeader from "./PageHeader";
 import DemoBox from "./DemoBox";
 import InputField from "./InputField";
 import SubmitButton from "./SubmitButton";
-import VendorIcon from "../../assets/vendor.png";
-import PharmaFooter from "../PharmaFooter.jsx";
+import VendorIcon from "../../assets/Vendor.png";
+import PharmaFooter from "../Layout/PharmaFooter.jsx";
+import BackButton from "../Layout/BackButton.jsx";
 
 export default function VendorLogin() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleBackClick = () => {
-    navigate("/signin");
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setMessage("Vendor login UI is ready. Backend connection will be added soon.");
   };
 
   return (
     <div className="min-h-screen bg-linear-to-b from-green-50 to-green-100">
       <div className="py-10">
         <FormContainer>
-          <div
-            className="mb-4 flex items-center gap-2 cursor-pointer text-gray-500 hover:text-gray-700"
-            onClick={handleBackClick}
-          >
-            â† Change Role
+          <div className="mb-4">
+            <BackButton label="Back" onClick={() => navigate("/signin")} />
           </div>
 
           <PageHeader
@@ -34,26 +36,39 @@ export default function VendorLogin() {
 
           <DemoBox email="vendor@demo.com" password="vendor123" />
 
-          <InputField
-            label="Email Address"
-            type="email"
-            placeholder="you@example.com"
-            icon="ðŸ“§"
-          />
+          <form onSubmit={handleSubmit}>
+            <InputField
+              label="Email Address"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              icon="Mail"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
 
-          <InputField
-            label="Password"
-            type="password"
-            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-          />
+            <InputField
+              label="Password"
+              type="password"
+              name="password"
+              placeholder="Enter password"
+              icon="Lock"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+            />
 
-          <SubmitButton text="Sign In" />
+            <SubmitButton text="Sign In" />
+          </form>
+
+          {message && <p className="mt-3 text-center text-sm text-green-600">{message}</p>}
 
           <p className="mt-4 text-center text-gray-600">
             Want to list your pharmacy?{" "}
             <span
               className="cursor-pointer font-medium text-green-600 hover:underline"
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/vendor-register")}
             >
               Register as Vendor
             </span>
