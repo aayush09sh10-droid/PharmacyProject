@@ -55,6 +55,18 @@ const approveVendor = async (vendorId) => {
   }
 };
 
+const deleteVendor = async (vendorId) => {
+  try {
+    const response = await axios.delete(`${VENDOR_BASE_URL}/${vendorId}`, {
+      headers: internalHeaders(),
+    });
+
+    return response.data.data;
+  } catch (error) {
+    wrapVendorError(error, "Failed to delete vendor");
+  }
+};
+
 const getAllOrders = async () => {
   try {
     const response = await axios.get(ORDER_BASE_URL);
@@ -79,4 +91,4 @@ const getVendorDashboardStats = async () => {
   }
 };
 
-export { approveVendor, getAllOrders, getAllVendors, getVendorDashboardStats };
+export { approveVendor, deleteVendor, getAllOrders, getAllVendors, getVendorDashboardStats };

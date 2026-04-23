@@ -3,7 +3,8 @@ import {
   loginVendor, 
   registerVendor,
   getAllVendors,
-  approveVendor
+  approveVendor,
+  deleteVendor
    
 } from '../controllers/vendor.controller.js';
 import { verifyInternalRequest } from '../middleware/vendor.middleware.js';
@@ -15,6 +16,7 @@ router.route("/")
 router.route("/register").post(registerVendor);
 router.route("/login").post(loginVendor);
 router.route("/:id/approve").patch(verifyInternalRequest, approveVendor);
+router.route("/:id").delete(verifyInternalRequest, deleteVendor);
 // router.route("/request").post(giveRequestOfVerification);
 
 export default router;

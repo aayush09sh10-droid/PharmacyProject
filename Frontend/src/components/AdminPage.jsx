@@ -17,6 +17,7 @@ import { clearAuthSession, getStoredUser, logoutUser } from "../services/auth.se
 import {
   approveVendor,
   deleteAdminUser,
+  deleteVendor,
   fetchAdminDashboard,
   fetchAdminOrders,
   fetchAdminPayments,
@@ -452,6 +453,19 @@ function VendorsPage() {
         { key: "email", label: "Email", width: "1.3fr" },
         { key: "status", label: "Status", width: "0.8fr" },
       ]}
+      actionRenderer={(row) => (
+        <button
+          type="button"
+          onClick={async () => {
+            if (!window.confirm(`Delete vendor ${row.pharmacyName}?`)) return;
+            await deleteVendor(row._id);
+            setRows((current) => current.filter((vendor) => vendor._id !== row._id));
+          }}
+          className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+        >
+          Delete
+        </button>
+      )}
     />
   );
 }

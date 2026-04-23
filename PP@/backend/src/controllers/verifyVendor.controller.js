@@ -8,7 +8,7 @@ const verifyVendor = asyncHandler(async(req,res,next)=>{
     const {id} = req.params;
     const vendor =await Vendor.findById(id);
 
-    if(!Vendor){
+    if(!vendor){
         throw new ApiError(400,"Vendor not found");
 
     }
@@ -16,16 +16,17 @@ const verifyVendor = asyncHandler(async(req,res,next)=>{
     await vendor.save();
 
     return res.status(200).json(
-        new ApiResponse(200,"Vendor verified successfully")
+        new ApiResponse(200, vendor, "Vendor verified successfully")
 
     );
 });
-const getAllmedicinesForAdmin =asyncHandler(async(req,res,next)=>{
-    const medicines = await Product.find()
-    .populate("vendor","new email status");
+const getAllMedicinesForAdmin = asyncHandler(async(req,res,next)=>{
+    const medicines = await Product.find().sort({ createdAt: -1 })
+        .populate("vendor","pharmacyName email status");
 
-    return req.status(200).json(
+    return res.status(200).json(
         new ApiResponse(200,medicines,"All medicines fetched for admin")
-    )
-})
-export {verifyVendor}
+    );
+});
+
+export { getAllMedicinesForAdmin, verifyVendor }

@@ -52,6 +52,15 @@ async function approveVendor(vendorId) {
   return handleResponse(response);
 }
 
+async function deleteVendor(vendorId) {
+  const response = await fetch(`${API_URL}/api/v1/admin/vendors/${vendorId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  return handleResponse(response);
+}
+
 async function fetchAdminOrders() {
   const response = await fetch(`${API_URL}/api/v1/admin/orders`, {
     headers: getAuthHeaders(),
@@ -78,6 +87,7 @@ async function fetchAdminReports() {
 
 export {
   approveVendor,
+  deleteVendor,
   fetchAdminDashboard,
   fetchAdminOrders,
   fetchAdminPayments,

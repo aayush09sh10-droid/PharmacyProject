@@ -1,6 +1,7 @@
 import { User } from "../models/user.model.js";
 import {
   approveVendor,
+  deleteVendor,
   getAllOrders,
   getAllVendors,
   getVendorDashboardStats,
@@ -106,7 +107,7 @@ const fetchDashboardOverview = asyncHandler(async (req, res) => {
     totalUsers: customerUsers.length,
     totalVendors: vendors.length,
     totalOrders: vendorStats.totalOrders ?? orders.length,
-    totalRevenue: vendorStats.totalRevenue ?? 0,
+    totalRevenue: 0,
     summaryCards: [
       {
         key: "users",
@@ -132,8 +133,8 @@ const fetchDashboardOverview = asyncHandler(async (req, res) => {
       {
         key: "revenue",
         label: "Total Revenue",
-        value: vendorStats.totalRevenue ?? 0,
-        change: `+${approvedVendors.length}%`,
+        value: 0,
+        change: "+0",
         tone: "amber",
         isCurrency: true,
       },
@@ -180,6 +181,15 @@ const approveVendorController = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, vendor, "Vendor approved successfully"));
+});
+
+const deleteVendorController = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const vendor = await deleteVendor(id);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, vendor, "Vendor deleted successfully"));
 });
 
 const fetchOrdersController = asyncHandler(async (req, res) => {
@@ -242,6 +252,7 @@ const fetchReportsController = asyncHandler(async (req, res) => {
 
 export {
   approveVendorController,
+  deleteVendorController,
   fetchDashboardOverview,
   fetchOrdersController,
   fetchPaymentsController,

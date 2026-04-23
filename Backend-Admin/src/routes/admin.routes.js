@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   approveVendorController,
+  deleteVendorController,
   fetchDashboardOverview,
   fetchOrdersController,
   fetchPaymentsController,
@@ -20,6 +21,7 @@ router.get("/users", fetchUsersController);
 router.delete("/users/:id", deleteUser);
 router.get("/vendors", fetchVendors);
 router.patch("/vendors/:id/approve", approveVendorController);
+router.delete("/vendors/:id", deleteVendorController);
 router.get("/orders", fetchOrdersController);
 router.get("/payments", fetchPaymentsController);
 router.get("/reports", fetchReportsController);

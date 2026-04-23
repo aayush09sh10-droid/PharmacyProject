@@ -118,9 +118,24 @@ const approveVendor = asyncHandler(async (req, res) => {
     );
 });
 
+const deleteVendor = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const vendor = await Vendor.findByIdAndDelete(id).select("-password -refreshToken");
+
+    if (!vendor) {
+        throw new ApiError(404, "Vendor not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, vendor, "Vendor deleted successfully")
+    );
+});
+
 export {
     loginVendor,
     registerVendor,
     getAllVendors,
-    approveVendor
+    approveVendor,
+    deleteVendor
 }
