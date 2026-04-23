@@ -5,10 +5,14 @@ import {
     getOrderById, 
     updateOrderStatus 
 } from '../controllers/order.controller.js';
+import { checkVendorVerification, verifyInternalRequest, verifyVendorJWT } from '../middleware/vendor.middleware.js';
 
 const router = Router();
 
-router.route("/").get(getAllOrders).post(createOrder);
-router.route("/:id").get(getOrderById).patch(updateOrderStatus);
+router.route("/").get(verifyVendorJWT, checkVendorVerification, getAllOrders).post(createOrder);
+router.route("/admin/all").get(verifyInternalRequest, getAllOrders);
+router.route("/:id")
+    .get(verifyVendorJWT, checkVendorVerification, getOrderById)
+    .patch(verifyVendorJWT, checkVendorVerification, updateOrderStatus);
 
 export default router;

@@ -112,7 +112,7 @@ function getStoredVendor() {
 
   try {
     return JSON.parse(rawVendor);
-  } catch (error) {
+  } catch {
     clearVendorSession();
     return null;
   }

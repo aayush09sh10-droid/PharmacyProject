@@ -69,7 +69,9 @@ const deleteVendor = async (vendorId) => {
 
 const getAllOrders = async () => {
   try {
-    const response = await axios.get(ORDER_BASE_URL);
+    const response = await axios.get(`${ORDER_BASE_URL}/admin/all`, {
+      headers: internalHeaders(),
+    });
     return response.data.data ?? [];
   } catch (error) {
     if (isNetworkFailure(error)) {
@@ -81,7 +83,9 @@ const getAllOrders = async () => {
 
 const getVendorDashboardStats = async () => {
   try {
-    const response = await axios.get(`${DASHBOARD_BASE_URL}/stats`);
+    const response = await axios.get(`${DASHBOARD_BASE_URL}/admin/stats`, {
+      headers: internalHeaders(),
+    });
     return response.data.data ?? {};
   } catch (error) {
     if (isNetworkFailure(error)) {

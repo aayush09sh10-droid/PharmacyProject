@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { createElement, useEffect, useMemo, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
@@ -90,7 +90,7 @@ function PendingApprovalPanel({ vendor }) {
   );
 }
 
-const StatCard = ({ icon: Icon, value, label, color }) => {
+const StatCard = ({ icon, value, label, color }) => {
   const colors = {
     blue: "bg-blue-50 text-blue-500",
     emerald: "bg-emerald-50 text-emerald-500",
@@ -101,7 +101,7 @@ const StatCard = ({ icon: Icon, value, label, color }) => {
   return (
     <div className="flex min-h-28 flex-col justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:min-h-36 sm:p-5">
       <div className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-inner sm:h-10 sm:w-10 ${colors[color]}`}>
-        <Icon size={16} className="sm:h-[18px] sm:w-[18px]" />
+        {createElement(icon, { size: 16, className: "sm:h-[18px] sm:w-[18px]" })}
       </div>
       <div>
         <h2 className="break-words text-lg font-black tracking-tight text-gray-900 sm:text-2xl">

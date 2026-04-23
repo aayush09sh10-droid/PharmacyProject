@@ -4,24 +4,34 @@ import { Order } from "../models/order.model.js";
 import { Product } from "../models/product.model.js";
 
 const getDashboardStats = asyncHandler(async (req, res) => {
-    // 1. Basic Stats
-    const totalOrders = await Order.countDocuments();
-    const pendingOrders = await Order.countDocuments({ status: "Pending" });
-    const deliveredOrders = await Order.countDocuments({ status: "Delivered" });
-    
-    // 2. Revenue Aggregation
-    const revenueAggregation = await Order.aggregate([
-        { $match: { paymentStatus: "Paid" } },
-        { $group: { _id: null, totalRevenue: { $sum: "$totalAmount" } } }
+    const isInternalRequest = req.headers["x-api-key"] && req.headers["x-api-key"] === process.env.INTERNAL_API_KEY;
+    const vendorFilter = isInternalRequest ? {} : { vendor: req.user._id };
+
+    const vendorProducts = await Product.find(vendorFilter).select("_id name category stock").sort({ name: 1 });
+    const vendorProductIds = vendorProducts.map((product) => product._id);
+
+    const orderFilter = vendorProductIds.length > 0
+        ? { "items.productId": { $in: vendorProductIds } }
+        : { _id: null };
+
+    const [orders, lowStockProducts] = await Promise.all([
+        vendorProductIds.length > 0
+            ? Order.find(orderFilter).sort({ createdAt: -1 })
+            : Promise.resolve([]),
+        Product.find({
+            ...vendorFilter,
+            stock: { $lt: 20 },
+        }).sort({ stock: 1 }).limit(5),
     ]);
-    const totalRevenue = revenueAggregation.length > 0 ? revenueAggregation[0].totalRevenue : 0;
 
-    // 3. Low Stock Alerts (Stock < 20)
-    const lowStockProducts = await Product.find({ stock: { $lt: 20 } }).limit(5);
-    const lowStockCount = await Product.countDocuments({ stock: { $lt: 20 } });
-
-    // 4. Recent Orders (Latest 5)
-    const recentOrders = await Order.find().sort({ createdAt: -1 }).limit(5);
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter((order) => order.status === "Pending").length;
+    const deliveredOrders = orders.filter((order) => order.status === "Delivered").length;
+    const totalRevenue = orders
+        .filter((order) => order.paymentStatus === "Paid")
+        .reduce((sum, order) => sum + Number(order.totalAmount || 0), 0);
+    const lowStockCount = vendorProducts.filter((product) => Number(product.stock || 0) < 20).length;
+    const recentOrders = orders.slice(0, 5);
 
     return res.status(200).json(
         new ApiResponse(
