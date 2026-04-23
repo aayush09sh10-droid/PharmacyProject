@@ -612,6 +612,7 @@ function VendorOrdersPage({ canManageInventory }) {
           address: "Address not available",
           items: order.items?.length || 0,
           total: order.totalAmount,
+          paymentMethod: order.paymentMethod || "Cash on Delivery",
         }));
         setOrders(mapped);
       } finally {
@@ -693,6 +694,10 @@ function VendorOrdersPage({ canManageInventory }) {
                       <div>
                         <span className="mb-1 block text-gray-400">Items:</span>
                         <span className="font-medium text-gray-900">{order.items} product(s)</span>
+                      </div>
+                      <div>
+                        <span className="mb-1 block text-gray-400">Payment:</span>
+                        <span className="font-medium text-gray-900">{order.paymentMethod || "Cash on Delivery"}</span>
                       </div>
                     </div>
                   </div>

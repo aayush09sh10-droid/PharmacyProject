@@ -5,6 +5,7 @@ import PharmaHeader from "../Layout/PharmaHeader.jsx";
 import PharmaFooter from "../Layout/PharmaFooter.jsx";
 import BackButton from "../Layout/BackButton.jsx";
 import { getStoredUser } from "../../services/auth.service.js";
+import { createCashOnDeliveryOrder } from "../../services/checkout.service.js";
 import {
   clearCart,
   getCartCount,
@@ -22,6 +23,10 @@ export default function CartPage() {
   const [items, setItems] = useState(() => getCartItems());
   const [cartCount, setCartCount] = useState(() => getCartCount());
   const [currentUser, setCurrentUser] = useState(() => getStoredUser());
+  const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [checkoutMessage, setCheckoutMessage] = useState("");
+  const [checkoutError, setCheckoutError] = useState("");
 
   useEffect(() => {
     const syncCart = () => {
@@ -49,6 +54,52 @@ export default function CartPage() {
     [items],
   );
   const isCustomerLoggedIn = Boolean(currentUser && currentUser.role === "User");
+
+  const handleCashOnDeliveryCheckout = async () => {
+    if (!isCustomerLoggedIn) {
+      navigate("/signin");
+      return;
+    }
+
+    setCheckoutError("");
+    setCheckoutMessage("");
+    setPlacingOrder(true);
+
+    try {
+      const groupedItems = items.reduce((groups, item) => {
+        if (!groups[item.vendorId]) {
+          groups[item.vendorId] = [];
+        }
+        groups[item.vendorId].push(item);
+        return groups;
+      }, {});
+
+      const vendorIds = Object.keys(groupedItems);
+
+      for (const vendorId of vendorIds) {
+        const vendorItems = groupedItems[vendorId];
+        await createCashOnDeliveryOrder({
+          vendorId,
+          customerId: currentUser?._id,
+          customerName: currentUser?.name || "Customer",
+          customerEmail: currentUser?.email || "",
+          items: vendorItems.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+          })),
+        });
+      }
+
+      clearCart();
+      setItems([]);
+      setCartCount(0);
+      setCheckoutMessage("Cash on Delivery order placed successfully.");
+    } catch (error) {
+      setCheckoutError(error.message || "Failed to place order");
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f5fcfb] text-slate-900">
@@ -167,12 +218,46 @@ export default function CartPage() {
                 </div>
               </div>
 
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">Payment Method</p>
+                <label className="mt-4 flex cursor-pointer items-center gap-3 rounded-2xl border border-emerald-200 bg-white px-4 py-4">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === "Cash on Delivery"}
+                    onChange={() => setPaymentMethod("Cash on Delivery")}
+                    className="h-4 w-4 text-emerald-600"
+                  />
+                  <div>
+                    <p className="font-semibold text-slate-900">Cash on Delivery</p>
+                    <p className="text-sm text-slate-500">Pay the vendor when the order arrives</p>
+                  </div>
+                </label>
+              </div>
+
+              {checkoutMessage ? (
+                <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                  {checkoutMessage}
+                </div>
+              ) : null}
+
+              {checkoutError ? (
+                <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                  {checkoutError}
+                </div>
+              ) : null}
+
               <button
                 type="button"
-                onClick={() => navigate(isCustomerLoggedIn ? "/" : "/signin")}
-                className="mt-6 w-full rounded-2xl bg-linear-to-r from-emerald-500 to-teal-500 px-6 py-4 text-sm font-semibold text-white shadow-lg shadow-emerald-100 transition hover:opacity-95"
+                onClick={handleCashOnDeliveryCheckout}
+                disabled={placingOrder}
+                className="mt-6 w-full rounded-2xl bg-linear-to-r from-emerald-500 to-teal-500 px-6 py-4 text-sm font-semibold text-white shadow-lg shadow-emerald-100 transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {isCustomerLoggedIn ? "Proceed to Checkout" : "Continue to Login"}
+                {isCustomerLoggedIn
+                  ? placingOrder
+                    ? "Placing Cash on Delivery Order..."
+                    : "Proceed to Payment"
+                  : "Continue to Login"}
               </button>
               <button
                 type="button"

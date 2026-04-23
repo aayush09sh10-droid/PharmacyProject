@@ -8,9 +8,23 @@ const orderSchema = new Schema(
             unique: true,
             index: true
         },
+        vendor: {
+            type: Schema.Types.ObjectId,
+            ref: "Vendor",
+            required: true,
+            index: true
+        },
+        customerId: {
+            type: Schema.Types.ObjectId,
+            default: null
+        },
         customerName: {
             type: String,
             required: true
+        },
+        customerEmail: {
+            type: String,
+            default: ""
         },
         items: [
             {
@@ -41,6 +55,11 @@ const orderSchema = new Schema(
             type: String,
             enum: ["Paid", "Unpaid", "Refunded"],
             default: "Unpaid"
+        },
+        paymentMethod: {
+            type: String,
+            enum: ["Cash on Delivery", "Online"],
+            default: "Cash on Delivery"
         }
     },
     {

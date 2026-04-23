@@ -53,9 +53,9 @@ function formatMetricValue(card) {
   if (card.isCurrency) {
     const value = Number(card.value || 0);
     if (value >= 1000) {
-      return `$${(value / 1000).toFixed(1)}K`;
+      return `Rs ${(value / 1000).toFixed(1)}K`;
     }
-    return `$${value.toFixed(2)}`;
+    return `Rs ${value.toFixed(2)}`;
   }
 
   const numeric = Number(card.value || 0);
@@ -500,8 +500,9 @@ function OrdersPage() {
           key: "totalAmount",
           label: "Amount",
           width: "0.8fr",
-          render: (row) => `$${Number(row.totalAmount || 0).toFixed(2)}`,
+          render: (row) => `Rs ${Number(row.totalAmount || 0).toFixed(2)}`,
         },
+        { key: "paymentMethod", label: "Method", width: "1fr" },
       ]}
     />
   );
@@ -533,11 +534,12 @@ function PaymentsPage() {
         { key: "orderId", label: "Order", width: "1fr" },
         { key: "customerName", label: "Customer", width: "1fr" },
         { key: "paymentStatus", label: "Payment", width: "0.8fr" },
+        { key: "paymentMethod", label: "Method", width: "1fr" },
         {
           key: "amount",
           label: "Amount",
           width: "0.8fr",
-          render: (row) => `$${Number(row.amount || 0).toFixed(2)}`,
+          render: (row) => `Rs ${Number(row.amount || 0).toFixed(2)}`,
         },
       ]}
     />

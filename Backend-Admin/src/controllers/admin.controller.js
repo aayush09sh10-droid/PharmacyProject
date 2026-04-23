@@ -102,12 +102,16 @@ const fetchDashboardOverview = asyncHandler(async (req, res) => {
     const today = new Date();
     return created.toDateString() === today.toDateString();
   }).length;
+  const totalRevenue = vendorStats.totalRevenue ?? orders.reduce(
+    (sum, order) => sum + Number(order.totalAmount || 0),
+    0,
+  );
 
   const summary = {
     totalUsers: customerUsers.length,
     totalVendors: vendors.length,
     totalOrders: vendorStats.totalOrders ?? orders.length,
-    totalRevenue: 0,
+    totalRevenue,
     summaryCards: [
       {
         key: "users",
@@ -133,8 +137,8 @@ const fetchDashboardOverview = asyncHandler(async (req, res) => {
       {
         key: "revenue",
         label: "Total Revenue",
-        value: 0,
-        change: "+0",
+        value: totalRevenue,
+        change: `+${recentOrdersToday}`,
         tone: "amber",
         isCurrency: true,
       },
@@ -209,6 +213,7 @@ const fetchPaymentsController = asyncHandler(async (req, res) => {
     customerName: order.customerName,
     amount: order.totalAmount,
     paymentStatus: order.paymentStatus || "Pending",
+    paymentMethod: order.paymentMethod || "Cash on Delivery",
     status: order.status,
     createdAt: order.createdAt,
   }));
