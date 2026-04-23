@@ -97,6 +97,19 @@ async function fetchVendorOrders() {
   return handleResponse(response);
 }
 
+async function updateVendorOrderStatus(id, payload) {
+  const response = await fetch(`${VENDOR_API_URL}/api/v1/orders/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getVendorAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+}
+
 function saveVendorSession(data) {
   const normalized = normalizeSessionPayload(data);
   localStorage.setItem("vendorUser", JSON.stringify(normalized.user));
@@ -138,5 +151,6 @@ export {
   logoutVendor,
   registerVendor,
   saveVendorSession,
+  updateVendorOrderStatus,
   updateVendorProduct,
 };

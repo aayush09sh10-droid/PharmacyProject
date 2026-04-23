@@ -10,6 +10,7 @@ import AdminPage from './components/AdminPage.jsx'
 import LandingPage from './components/Home/LandingPage.jsx'
 import AboutPage from './components/Home/AboutPage.jsx'
 import CartPage from './components/Shop/CartPage.jsx'
+import CustomerOrdersPage from './components/Shop/CustomerOrdersPage.jsx'
 import VendorPortal from './components/VendorPortal.jsx'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/my-orders" element={<CustomerOrdersPage />} />
         <Route path="/signin" element={<LoginOuter mode="login" />} />
         <Route path="/register" element={<LoginOuter mode="register" />} />
         <Route path="/vendor-login" element={<VendorLogin />} />

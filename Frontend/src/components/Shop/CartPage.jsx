@@ -94,6 +94,7 @@ export default function CartPage() {
       setItems([]);
       setCartCount(0);
       setCheckoutMessage("Cash on Delivery order placed successfully.");
+      navigate("/my-orders");
     } catch (error) {
       setCheckoutError(error.message || "Failed to place order");
     } finally {

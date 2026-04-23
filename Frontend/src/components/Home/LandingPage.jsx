@@ -90,6 +90,7 @@ function PharmacyCard({ vendor, onAddToCart }) {
 
 export default function LandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState("");
   const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -118,7 +119,7 @@ export default function LandingPage() {
   }, []);
 
   const filteredCatalog = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase();
+    const query = appliedSearchTerm.trim().toLowerCase();
 
     if (!query) {
       return catalog;
@@ -134,18 +135,28 @@ export default function LandingPage() {
         ),
       }))
       .filter((vendor) => vendor.products.length > 0);
-  }, [catalog, searchTerm]);
+  }, [catalog, appliedSearchTerm]);
 
   const handleAddToCart = (product) => {
     addToCart({
       productId: product._id,
       vendorId: product.vendor?._id || product.vendor,
-      vendorName: product.vendor?.pharmacyName || "Vendor Pharmacy",
+      vendorName: product.vendor?.pharmacyName || product.vendorName || "Vendor Pharmacy",
       name: product.name,
       price: Number(product.price || 0),
       stock: Number(product.stock || 0),
     });
     setCartCount(getCartCount());
+  };
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    setAppliedSearchTerm(searchTerm);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setAppliedSearchTerm("");
   };
 
   const totalProducts = filteredCatalog.reduce((count, vendor) => count + vendor.products.length, 0);
@@ -183,7 +194,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center">
+          <form className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center" onSubmit={handleSearchSubmit}>
             <div className="flex flex-1 items-center gap-3 rounded-2xl border border-emerald-200 px-4 py-4">
               <Search size={18} className="text-slate-400" />
               <input
@@ -194,10 +205,23 @@ export default function LandingPage() {
                 className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
               />
             </div>
+            <button
+              type="submit"
+              className="rounded-2xl bg-linear-to-r from-emerald-500 to-teal-500 px-6 py-4 text-sm font-semibold text-white shadow-lg shadow-emerald-100 transition hover:opacity-95"
+            >
+              Search
+            </button>
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="rounded-2xl border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+            >
+              Clear
+            </button>
             <div className="rounded-2xl bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700">
               {filteredCatalog.length} pharmacies • {totalProducts} products
             </div>
-          </div>
+          </form>
         </section>
 
         <section>

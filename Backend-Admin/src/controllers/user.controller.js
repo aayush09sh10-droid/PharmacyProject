@@ -2,6 +2,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.util.js";
 import { ApiResponse } from "../utils/apiResponse.js";
+import { getAllOrders } from "../services/vendor.service.js";
 
 const generateAccessAndRefreshToken=async(userId)=>{
     try {
@@ -140,5 +141,20 @@ const deleteUser = asyncHandler(async (req, res) => {
     );
 })
 
+const fetchCustomerOrders = asyncHandler(async (req, res) => {
+    const orders = await getAllOrders();
+    const safeOrders = Array.isArray(orders) ? orders : [];
 
-export {registerUser,loginUser,logoutUser,getProfile, deleteUser}
+    const customerOrders = safeOrders.filter((order) => {
+        const sameCustomerId = order.customerId && String(order.customerId) === String(req.user._id);
+        const sameCustomerEmail = order.customerEmail && order.customerEmail === req.user.email;
+        return sameCustomerId || sameCustomerEmail;
+    });
+
+    return res.status(200).json(
+        new ApiResponse(200, customerOrders, "Customer orders fetched successfully")
+    );
+});
+
+
+export {registerUser,loginUser,logoutUser,getProfile, deleteUser, fetchCustomerOrders}

@@ -12,8 +12,11 @@ import {
   X,
 } from "lucide-react";
 import { clearAuthSession, getStoredUser, logoutUser } from "../../services/auth.service.js";
+import { getCartCount } from "../../services/cart.service.js";
 
-function NavItem({ icon: Icon, label, active = false, onClick }) {
+function NavItem({ icon, label, active = false, onClick }) {
+  const IconComponent = icon;
+
   return (
     <button
       type="button"
@@ -24,7 +27,7 @@ function NavItem({ icon: Icon, label, active = false, onClick }) {
           : "border border-transparent text-slate-700 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900"
       }`}
     >
-      <Icon size={16} />
+      <IconComponent size={16} />
       <span>{label}</span>
     </button>
   );
@@ -32,19 +35,38 @@ function NavItem({ icon: Icon, label, active = false, onClick }) {
 
 export default function PharmaHeader({
   activePage = "home",
-  cartCount = 0,
+  cartCount = null,
   showCustomerMenu = false,
 }) {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [liveCartCount, setLiveCartCount] = useState(() => getCartCount());
 
   useEffect(() => {
     setCurrentUser(getStoredUser());
   }, []);
 
+  useEffect(() => {
+    const syncUi = () => {
+      setCurrentUser(getStoredUser());
+      setLiveCartCount(getCartCount());
+    };
+
+    window.addEventListener("storage", syncUi);
+    window.addEventListener("focus", syncUi);
+    window.addEventListener("cart-updated", syncUi);
+
+    return () => {
+      window.removeEventListener("storage", syncUi);
+      window.removeEventListener("focus", syncUi);
+      window.removeEventListener("cart-updated", syncUi);
+    };
+  }, []);
+
   const customerUser =
     currentUser?.role === "User" ? currentUser : showCustomerMenu ? { name: "Customer" } : null;
+  const effectiveCartCount = cartCount ?? liveCartCount;
 
   const primaryNavItems = [
     {
@@ -59,6 +81,16 @@ export default function PharmaHeader({
       active: activePage === "about",
       onClick: () => navigate("/about"),
     },
+    ...(customerUser
+      ? [
+          {
+            icon: ShoppingCart,
+            label: "My Orders",
+            active: activePage === "orders",
+            onClick: () => navigate("/my-orders"),
+          },
+        ]
+      : []),
     {
       icon: CircleHelp,
       label: "Support",
@@ -158,9 +190,9 @@ export default function PharmaHeader({
           }`}
           aria-label="Open cart"
         >
-          {cartCount > 0 ? (
+          {effectiveCartCount > 0 ? (
             <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-semibold text-white">
-              {cartCount}
+              {effectiveCartCount}
             </span>
           ) : null}
           <ShoppingCart size={18} />
@@ -212,9 +244,9 @@ export default function PharmaHeader({
                 : "border-amber-300 bg-white text-amber-700 hover:bg-amber-50"
             }`}
           >
-            {cartCount > 0 ? (
+            {effectiveCartCount > 0 ? (
               <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-semibold text-white">
-                {cartCount}
+                {effectiveCartCount}
               </span>
             ) : null}
             <ShoppingCart size={16} />
@@ -327,9 +359,9 @@ export default function PharmaHeader({
                   : "border-amber-300 bg-white text-amber-700 hover:bg-amber-50"
               }`}
             >
-              {cartCount > 0 ? (
+              {effectiveCartCount > 0 ? (
                 <span className="absolute right-3 top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-semibold text-white">
-                  {cartCount}
+                  {effectiveCartCount}
                 </span>
               ) : null}
               <ShoppingCart size={16} />

@@ -11,7 +11,6 @@ import {
   Clock,
   DollarSign,
   Edit2,
-  Eye,
   LayoutDashboard,
   Loader2,
   LogOut,
@@ -31,6 +30,7 @@ import {
   fetchVendorProducts,
   getStoredVendor,
   logoutVendor,
+  updateVendorOrderStatus,
   updateVendorProduct,
 } from "../services/vendor.service.js";
 
@@ -591,34 +591,36 @@ function VendorCatalogPage({ title, canManageInventory, inventoryMode = false })
   );
 }
 
-function VendorOrdersPage({ canManageInventory }) {
+function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [updatingOrderId, setUpdatingOrderId] = useState("");
+
+  const loadOrders = async () => {
+    try {
+      const data = await fetchVendorOrders();
+      const mapped = (data || []).map((order) => ({
+        id: `#${order.orderId}`,
+        rawId: order._id,
+        status: order.status,
+        customer: order.customerName,
+        date: new Date(order.createdAt).toLocaleDateString(),
+        address: "Address not available",
+        items: order.items?.length || 0,
+        total: order.totalAmount,
+        paymentMethod: order.paymentMethod || "Cash on Delivery",
+      }));
+      setOrders(mapped);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!canManageInventory) {
       setLoading(false);
       return;
     }
-
-    const loadOrders = async () => {
-      try {
-        const data = await fetchVendorOrders();
-        const mapped = (data || []).map((order) => ({
-          id: `#${order.orderId}`,
-          status: order.status,
-          customer: order.customerName,
-          date: new Date(order.createdAt).toLocaleDateString(),
-          address: "Address not available",
-          items: order.items?.length || 0,
-          total: order.totalAmount,
-          paymentMethod: order.paymentMethod || "Cash on Delivery",
-        }));
-        setOrders(mapped);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     loadOrders();
   }, [canManageInventory]);
@@ -645,9 +647,22 @@ function VendorOrdersPage({ canManageInventory }) {
   };
 
   const getActions = (status) => {
-    if (status === "Pending") return ["view", "accept", "deny"];
-    if (status === "Processing") return ["view", "ship"];
-    return ["view"];
+    if (status === "Pending") return ["accept", "deny"];
+    if (status === "Processing") return ["ship"];
+    return [];
+  };
+
+  const handleStatusUpdate = async (orderId, payload) => {
+    setUpdatingOrderId(orderId);
+    try {
+      await updateVendorOrderStatus(orderId, payload);
+      await loadOrders();
+      if (onOrdersUpdated) {
+        await onOrdersUpdated();
+      }
+    } finally {
+      setUpdatingOrderId("");
+    }
   };
 
   return (
@@ -704,25 +719,38 @@ function VendorOrdersPage({ canManageInventory }) {
 
                   <div className="flex items-center justify-between gap-4 border-t border-gray-100 pt-4 lg:ml-5 lg:min-w-[120px] lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
                     <p className="text-lg font-bold text-gray-900 sm:text-xl">Rs {Number(order.total).toFixed(2)}</p>
-                    <div className="flex items-center gap-2 lg:flex-col">
-                      {actions.includes("view") && (
-                        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-500 transition hover:bg-blue-100">
-                          <Eye size={16} />
-                        </button>
-                      )}
+                    <div className="flex flex-wrap items-center justify-end gap-2 lg:max-w-[180px]">
                       {actions.includes("accept") && (
-                        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 transition hover:bg-emerald-100">
+                        <button
+                          type="button"
+                          disabled={updatingOrderId === order.rawId}
+                          onClick={() => handleStatusUpdate(order.rawId, { status: "Processing" })}
+                          className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-100 disabled:opacity-60"
+                        >
                           <Check size={16} />
+                          <span>{updatingOrderId === order.rawId ? "Updating..." : "Accept"}</span>
                         </button>
                       )}
                       {actions.includes("deny") && (
-                        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-100">
+                        <button
+                          type="button"
+                          disabled={updatingOrderId === order.rawId}
+                          onClick={() => handleStatusUpdate(order.rawId, { status: "Cancelled" })}
+                          className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
+                        >
                           <X size={16} />
+                          <span>Reject</span>
                         </button>
                       )}
                       {actions.includes("ship") && (
-                        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-50 text-purple-500 transition hover:bg-purple-100">
+                        <button
+                          type="button"
+                          disabled={updatingOrderId === order.rawId}
+                          onClick={() => handleStatusUpdate(order.rawId, { status: "Shipped" })}
+                          className="inline-flex items-center gap-2 rounded-full bg-purple-50 px-4 py-2 text-sm font-semibold text-purple-600 transition hover:bg-purple-100 disabled:opacity-60"
+                        >
                           <Truck size={16} />
+                          <span>{updatingOrderId === order.rawId ? "Updating..." : "Ship"}</span>
                         </button>
                       )}
                     </div>
@@ -844,6 +872,24 @@ export default function VendorPortal() {
   });
   const [statsLoading, setStatsLoading] = useState(true);
 
+  const loadStats = async () => {
+    try {
+      const data = await fetchVendorDashboardStats();
+      setStats({
+        totalOrders: data.totalOrders || 0,
+        totalRevenue: data.totalRevenue || 0,
+        pendingOrders: data.pendingOrders || 0,
+        lowStockCount: data.lowStockCount || 0,
+        lowStockProducts: data.lowStockProducts || [],
+        recentOrders: data.recentOrders || [],
+      });
+    } catch (error) {
+      console.error("Error fetching vendor dashboard stats:", error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!vendor || vendor.role !== "Vendor") {
       navigate("/vendor-login", { replace: true });
@@ -854,24 +900,6 @@ export default function VendorPortal() {
       setStatsLoading(false);
       return;
     }
-
-    const loadStats = async () => {
-      try {
-        const data = await fetchVendorDashboardStats();
-        setStats({
-          totalOrders: data.totalOrders || 0,
-          totalRevenue: data.totalRevenue || 0,
-          pendingOrders: data.pendingOrders || 0,
-          lowStockCount: data.lowStockCount || 0,
-          lowStockProducts: data.lowStockProducts || [],
-          recentOrders: data.recentOrders || [],
-        });
-      } catch (error) {
-        console.error("Error fetching vendor dashboard stats:", error);
-      } finally {
-        setStatsLoading(false);
-      }
-    };
 
     loadStats();
   }, [navigate, vendor]);
@@ -925,7 +953,12 @@ export default function VendorPortal() {
             />
             <Route
               path="orders"
-              element={<VendorOrdersPage canManageInventory={canManageInventory} />}
+              element={
+                <VendorOrdersPage
+                  canManageInventory={canManageInventory}
+                  onOrdersUpdated={loadStats}
+                />
+              }
             />
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
