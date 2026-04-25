@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Vendor } from "../models/vendor.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { createNotification } from "../services/notification.service.js";
 
 const loginVendor = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -81,6 +82,20 @@ const registerVendor = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Something went wrong while registering the vendor");
     }
 
+    await createNotification({
+        recipientRole: "Admin",
+        actorRole: "Vendor",
+        actorId: createdVendor._id,
+        title: "New vendor registration",
+        message: `${createdVendor.pharmacyName} submitted a vendor registration request.`,
+        entityType: "vendor",
+        entityId: String(createdVendor._id),
+        metadata: {
+            pharmacyName: createdVendor.pharmacyName,
+            ownerName: createdVendor.ownerName,
+        },
+    });
+
     return res.status(201).json(
         new ApiResponse(201, createdVendor, "Vendor registered successfully")
     );
@@ -112,6 +127,20 @@ const approveVendor = asyncHandler(async (req, res) => {
     if (!vendor) {
         throw new ApiError(404, "Vendor not found");
     }
+
+    await createNotification({
+        recipientRole: "Vendor",
+        recipientId: vendor._id,
+        actorRole: "Admin",
+        title: "Vendor account approved",
+        message: `${vendor.pharmacyName} has been approved and can now manage products and orders.`,
+        entityType: "vendor",
+        entityId: String(vendor._id),
+        metadata: {
+            pharmacyName: vendor.pharmacyName,
+            status: vendor.status,
+        },
+    });
 
     return res.status(200).json(
         new ApiResponse(200, vendor, "Vendor approved successfully")

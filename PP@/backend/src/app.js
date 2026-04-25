@@ -23,12 +23,14 @@ app.use(cookieParser())
 
 //routes import
 import dashboardRouter from './routes/dashboard.routes.js'
+import notificationRouter from './routes/notification.routes.js'
 import orderRouter from './routes/order.routes.js'
 import productRouter from './routes/product.routes.js'
 import vendorRouter from './routes/vendor.routes.js'
 
 //routes declaration
 app.use("/api/v1/dashboard", dashboardRouter)
+app.use("/api/v1/notifications", notificationRouter)
 app.use("/api/v1/orders", orderRouter)
 app.use("/api/v1/products", productRouter)
 app.use("/api/v1/vendors", vendorRouter)

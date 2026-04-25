@@ -110,6 +110,29 @@ async function updateVendorOrderStatus(id, payload) {
   return handleResponse(response);
 }
 
+async function fetchVendorNotifications() {
+  const response = await fetch(`${VENDOR_API_URL}/api/v1/notifications`, {
+    headers: getVendorAuthHeaders(),
+  });
+  return handleResponse(response);
+}
+
+async function markVendorNotificationAsRead(id) {
+  const response = await fetch(`${VENDOR_API_URL}/api/v1/notifications/${id}/read`, {
+    method: "PATCH",
+    headers: getVendorAuthHeaders(),
+  });
+  return handleResponse(response);
+}
+
+async function markAllVendorNotificationsAsRead() {
+  const response = await fetch(`${VENDOR_API_URL}/api/v1/notifications/read-all`, {
+    method: "PATCH",
+    headers: getVendorAuthHeaders(),
+  });
+  return handleResponse(response);
+}
+
 function saveVendorSession(data) {
   const normalized = normalizeSessionPayload(data);
   localStorage.setItem("vendorUser", JSON.stringify(normalized.user));
@@ -144,11 +167,14 @@ export {
   createVendorProduct,
   deleteVendorProduct,
   fetchVendorDashboardStats,
+  fetchVendorNotifications,
   fetchVendorOrders,
   fetchVendorProducts,
   getStoredVendor,
   loginVendor,
   logoutVendor,
+  markAllVendorNotificationsAsRead,
+  markVendorNotificationAsRead,
   registerVendor,
   saveVendorSession,
   updateVendorOrderStatus,

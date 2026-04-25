@@ -4,6 +4,7 @@ import { ApiError } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.util.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { getAllOrders, updateOrderById } from "../services/vendor.service.js";
+import { createNotification } from "../services/notification.service.js";
 
 const buildFallbackAssistantReply = (prompt) => {
     const normalizedPrompt = prompt.toLowerCase();
@@ -97,6 +98,21 @@ const registerUser= asyncHandler(async(req,res)=>{
     if(!createdUsername){
         throw new ApiError(500,"Something went wrong")
     }
+
+    await createNotification({
+        recipientRole: "Admin",
+        title: "New user registered",
+        message: `${createdUsername.name} created a new customer account.`,
+        actorRole: createdUsername.role === "Admin" ? "Admin" : "User",
+        actorId: createdUsername._id,
+        entityType: "user",
+        entityId: String(createdUsername._id),
+        metadata: {
+            userName: createdUsername.name,
+            email: createdUsername.email,
+        },
+    });
+
     return res.status(201).json(
         new ApiResponse(201, createdUsername, "User Registered")
     )
@@ -231,6 +247,36 @@ const cancelCustomerOrder = asyncHandler(async (req, res) => {
             cancelledAt: new Date().toISOString(),
         },
     });
+
+    await Promise.all([
+        createNotification({
+            recipientRole: "Vendor",
+            recipientId: order.vendor,
+            actorRole: "User",
+            actorId: req.user._id,
+            title: "Order cancelled by customer",
+            message: `${order.orderId} was cancelled by ${req.user.name || order.customerName}.`,
+            entityType: "order",
+            entityId: String(order._id),
+            metadata: {
+                orderId: order.orderId,
+                status: "Cancelled",
+            },
+        }),
+        createNotification({
+            recipientRole: "Admin",
+            actorRole: "User",
+            actorId: req.user._id,
+            title: "Customer cancelled an order",
+            message: `${order.orderId} was cancelled by ${req.user.name || order.customerName}.`,
+            entityType: "order",
+            entityId: String(order._id),
+            metadata: {
+                orderId: order.orderId,
+                status: "Cancelled",
+            },
+        }),
+    ]);
 
     return res.status(200).json(
         new ApiResponse(200, updatedOrder, "Order cancelled successfully")

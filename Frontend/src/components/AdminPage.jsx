@@ -3,7 +3,6 @@ import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "reac
 import {
   AlertTriangle,
   BarChart3,
-  Bell,
   DollarSign,
   LayoutDashboard,
   LogOut,
@@ -14,7 +13,13 @@ import {
   Users,
   X,
 } from "lucide-react";
+import NotificationBell from "./Notifications/NotificationBell.jsx";
 import { clearAuthSession, getStoredUser, logoutUser } from "../services/auth.service.js";
+import {
+  fetchNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from "../services/notification.service.js";
 import {
   approveVendor,
   deleteAdminUser,
@@ -180,10 +185,29 @@ function AdminSidebar({ adminName, onLogout, isLoggingOut, isMobileOpen, onClose
 
 function AdminTopbar({ onOpenMenu }) {
   const location = useLocation();
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
   const currentSection = useMemo(
     () => menuItems.find((item) => location.pathname.includes(item.path))?.name || "Dashboard",
     [location.pathname],
   );
+
+  const loadNotifications = async () => {
+    setNotificationsLoading(true);
+    try {
+      const data = await fetchNotifications();
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to load notifications:", error);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
 
   return (
     <div className="flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-6 lg:px-8 lg:py-6">
@@ -204,13 +228,29 @@ function AdminTopbar({ onOpenMenu }) {
           </p>
         </div>
       </div>
-      <button
-        type="button"
-        className="relative mt-1 inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
-      >
-        <Bell size={22} />
-        <span className="absolute right-1 top-1 h-3 w-3 rounded-full bg-rose-500" />
-      </button>
+      <NotificationBell
+        notifications={notifications}
+        isOpen={notificationsOpen}
+        loading={notificationsLoading}
+        onToggle={() => {
+          const nextValue = !notificationsOpen;
+          setNotificationsOpen(nextValue);
+          if (nextValue) {
+            loadNotifications();
+          }
+        }}
+        onMarkRead={async (id) => {
+          await markNotificationAsRead(id);
+          setNotifications((current) =>
+            current.map((item) => (item._id === id ? { ...item, isRead: true } : item)),
+          );
+        }}
+        onMarkAllRead={async () => {
+          await markAllNotificationsAsRead();
+          setNotifications((current) => current.map((item) => ({ ...item, isRead: true })));
+        }}
+        buttonClassName="relative mt-1 inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
+      />
     </div>
   );
 }

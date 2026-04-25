@@ -28,13 +28,17 @@ import {
   createVendorProduct,
   deleteVendorProduct,
   fetchVendorDashboardStats,
+  fetchVendorNotifications,
   fetchVendorOrders,
   fetchVendorProducts,
   getStoredVendor,
   logoutVendor,
+  markAllVendorNotificationsAsRead,
+  markVendorNotificationAsRead,
   updateVendorOrderStatus,
   updateVendorProduct,
 } from "../services/vendor.service.js";
+import NotificationBell from "./Notifications/NotificationBell.jsx";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
@@ -980,6 +984,9 @@ export default function VendorPortal() {
   const vendor = useMemo(() => getStoredVendor(), []);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -1008,6 +1015,18 @@ export default function VendorPortal() {
     }
   };
 
+  const loadNotifications = async () => {
+    try {
+      setNotificationsLoading(true);
+      const data = await fetchVendorNotifications();
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching vendor notifications:", error);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!vendor || vendor.role !== "Vendor") {
       navigate("/vendor-login", { replace: true });
@@ -1020,6 +1039,7 @@ export default function VendorPortal() {
     }
 
     loadStats();
+    loadNotifications();
   }, [navigate, vendor]);
 
   useEffect(() => {
@@ -1080,12 +1100,12 @@ export default function VendorPortal() {
       </div>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-transparent">
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-emerald-100 bg-white/78 px-4 py-3 shadow-sm backdrop-blur-md md:hidden">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-emerald-100 bg-white/78 px-4 py-3 shadow-sm backdrop-blur-md">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setIsMobileSidebarOpen(true)}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800 md:hidden"
             >
               <Menu size={18} />
             </button>
@@ -1094,8 +1114,33 @@ export default function VendorPortal() {
               <h1 className="truncate text-lg font-bold text-emerald-950">{vendor.pharmacyName || "Vendor"}</h1>
             </div>
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 shadow-sm">
-            <Store size={18} />
+          <div className="flex items-center gap-3">
+            <NotificationBell
+              notifications={notifications}
+              isOpen={notificationsOpen}
+              loading={notificationsLoading}
+              onToggle={() => {
+                const nextValue = !notificationsOpen;
+                setNotificationsOpen(nextValue);
+                if (nextValue) {
+                  loadNotifications();
+                }
+              }}
+              onMarkRead={async (id) => {
+                await markVendorNotificationAsRead(id);
+                setNotifications((current) =>
+                  current.map((item) => (item._id === id ? { ...item, isRead: true } : item)),
+                );
+              }}
+              onMarkAllRead={async () => {
+                await markAllVendorNotificationsAsRead();
+                setNotifications((current) => current.map((item) => ({ ...item, isRead: true })));
+              }}
+              buttonClassName="relative inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-200 bg-white text-emerald-800 shadow-sm transition hover:bg-emerald-50"
+            />
+            <div className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 shadow-sm md:flex">
+              <Store size={18} />
+            </div>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6">

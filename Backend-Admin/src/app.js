@@ -4,6 +4,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser"
 import router from "./routes/user.routes.js";
 import adminRouter from "./routes/admin.routes.js";
+import notificationRouter from "./routes/notification.routes.js";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1/users", router);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/notifications", notificationRouter);
 
 app.use((err, req, res, next) => {
     console.error(err);

@@ -12,6 +12,12 @@ import {
   X,
 } from "lucide-react";
 import { clearAuthSession, getStoredUser, logoutUser } from "../../services/auth.service.js";
+import NotificationBell from "../Notifications/NotificationBell.jsx";
+import {
+  fetchNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from "../../services/notification.service.js";
 import { getCartCount } from "../../services/cart.service.js";
 
 function NavItem({ icon, label, active = false, onClick }) {
@@ -42,6 +48,9 @@ export default function PharmaHeader({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [liveCartCount, setLiveCartCount] = useState(() => getCartCount());
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   useEffect(() => {
     setCurrentUser(getStoredUser());
@@ -136,6 +145,31 @@ export default function PharmaHeader({
     }
   };
 
+  const loadNotifications = async () => {
+    if (!customerUser) {
+      return;
+    }
+
+    setNotificationsLoading(true);
+    try {
+      const data = await fetchNotifications();
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to load notifications:", error);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!customerUser) {
+      setNotifications([]);
+      return;
+    }
+
+    loadNotifications();
+  }, [customerUser?.role, customerUser?._id]);
+
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
@@ -201,6 +235,28 @@ export default function PharmaHeader({
         <div className="hidden items-center gap-3 sm:flex">
           {customerUser ? (
             <div className="flex items-center gap-3">
+              <NotificationBell
+                notifications={notifications}
+                isOpen={notificationsOpen}
+                loading={notificationsLoading}
+                onToggle={() => {
+                  const nextValue = !notificationsOpen;
+                  setNotificationsOpen(nextValue);
+                  if (nextValue) {
+                    loadNotifications();
+                  }
+                }}
+                onMarkRead={async (id) => {
+                  await markNotificationAsRead(id);
+                  setNotifications((current) =>
+                    current.map((item) => (item._id === id ? { ...item, isRead: true } : item)),
+                  );
+                }}
+                onMarkAllRead={async () => {
+                  await markAllNotificationsAsRead();
+                  setNotifications((current) => current.map((item) => ({ ...item, isRead: true })));
+                }}
+              />
               <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700 shadow-sm">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
                   {(customerUser.name || "C").charAt(0).toUpperCase()}
@@ -300,6 +356,31 @@ export default function PharmaHeader({
         <div className="border-b border-slate-200 px-4 py-5">
           {customerUser ? (
             <div className="space-y-3">
+              <NotificationBell
+                notifications={notifications}
+                isOpen={notificationsOpen}
+                loading={notificationsLoading}
+                onToggle={() => {
+                  const nextValue = !notificationsOpen;
+                  setNotificationsOpen(nextValue);
+                  if (nextValue) {
+                    loadNotifications();
+                  }
+                }}
+                onMarkRead={async (id) => {
+                  await markNotificationAsRead(id);
+                  setNotifications((current) =>
+                    current.map((item) => (item._id === id ? { ...item, isRead: true } : item)),
+                  );
+                }}
+                onMarkAllRead={async () => {
+                  await markAllNotificationsAsRead();
+                  setNotifications((current) => current.map((item) => ({ ...item, isRead: true })));
+                }}
+                className="w-full"
+                panelClassName="left-0 right-auto mt-2 w-full max-w-full"
+                buttonClassName="relative inline-flex w-full items-center justify-center rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+              />
               <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
                   {(customerUser.name || "C").charAt(0).toUpperCase()}

@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Order } from "../models/order.model.js";
 import { Product } from "../models/product.model.js";
+import { createNotification } from "../services/notification.service.js";
 
 const INTERNAL_REQUEST_HEADER = "x-api-key";
 
@@ -86,6 +87,37 @@ const createOrder = asyncHandler(async (req, res) => {
         paymentStatus: "Unpaid",
     });
 
+    await Promise.all([
+        createNotification({
+            recipientRole: "Vendor",
+            recipientId: vendorId,
+            actorRole: customerId ? "User" : "System",
+            actorId: customerId || null,
+            title: "New order received",
+            message: `${order.orderId} was placed by ${customerName}.`,
+            entityType: "order",
+            entityId: String(order._id),
+            metadata: {
+                orderId: order.orderId,
+                status: order.status,
+            },
+        }),
+        createNotification({
+            recipientRole: "Admin",
+            actorRole: customerId ? "User" : "System",
+            actorId: customerId || null,
+            title: "New order placed",
+            message: `${order.orderId} was placed for vendor ${vendorId}.`,
+            entityType: "order",
+            entityId: String(order._id),
+            metadata: {
+                orderId: order.orderId,
+                status: order.status,
+                vendorId: String(vendorId),
+            },
+        }),
+    ]);
+
     return res.status(201).json(
         new ApiResponse(201, order, "Order created successfully")
     );
@@ -160,6 +192,45 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
         },
         { new: true }
     );
+
+    if (status && status !== existingOrder.status) {
+        const notificationTasks = [
+            createNotification({
+                recipientRole: "Admin",
+                actorRole: isInternalRequest(req) ? "Admin" : "Vendor",
+                actorId: isInternalRequest(req) ? null : req.user._id,
+                title: "Order status updated",
+                message: `${existingOrder.orderId} moved from ${existingOrder.status} to ${status}.`,
+                entityType: "order",
+                entityId: String(existingOrder._id),
+                metadata: {
+                    orderId: existingOrder.orderId,
+                    status,
+                },
+            }),
+        ];
+
+        if (existingOrder.customerId) {
+            notificationTasks.push(
+                createNotification({
+                    recipientRole: "User",
+                    recipientId: existingOrder.customerId,
+                    actorRole: isInternalRequest(req) ? "Admin" : "Vendor",
+                    actorId: isInternalRequest(req) ? null : req.user._id,
+                    title: "Order updated",
+                    message: `${existingOrder.orderId} is now ${status}.`,
+                    entityType: "order",
+                    entityId: String(existingOrder._id),
+                    metadata: {
+                        orderId: existingOrder.orderId,
+                        status,
+                    },
+                }),
+            );
+        }
+
+        await Promise.all(notificationTasks);
+    }
 
     return res.status(200).json(
         new ApiResponse(200, order, "Order status updated successfully")
