@@ -15,6 +15,8 @@ import {
   LayoutDashboard,
   Loader2,
   LogOut,
+  MapPin,
+  Navigation,
   Package,
   Plus,
   Search,
@@ -32,6 +34,7 @@ import {
   getStoredVendor,
   logoutVendor,
   updateVendorProduct,
+  updateVendorProfile,
 } from "../services/vendor.service.js";
 
 const navItems = [
@@ -39,6 +42,7 @@ const navItems = [
   { name: "Products", icon: Package, path: "products" },
   { name: "Inventory", icon: Boxes, path: "inventory" },
   { name: "Orders", icon: ClipboardList, path: "orders" },
+  { name: "Settings", icon: Store, path: "settings" },
 ];
 
 function PendingApprovalPanel({ vendor }) {
@@ -732,6 +736,144 @@ function VendorOrdersPage({ canManageInventory }) {
   );
 }
 
+function VendorSettingsPage({ vendor }) {
+  const [profile, setProfile] = useState({
+    pharmacyName: vendor.pharmacyName || "",
+    ownerName: vendor.ownerName || "",
+    phone: vendor.phone || "",
+    latitude: vendor.location?.coordinates[1] || "",
+    longitude: vendor.location?.coordinates[0] || "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState(null);
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setMessage(null);
+    try {
+      const payload = {
+        ...profile,
+        location: {
+          coordinates: [profile.longitude, profile.latitude]
+        }
+      };
+      await updateVendorProfile(payload);
+      setMessage({ type: "success", text: "Profile updated successfully!" });
+    } catch (err) {
+      setMessage({ type: "error", text: "Failed to update profile." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const detectLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        setProfile({
+          ...profile,
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        });
+      });
+    }
+  };
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-6 pb-12">
+      <div>
+        <h1 className="text-2xl font-black text-gray-900">Store Settings</h1>
+        <p className="text-gray-500">Update your pharmacy details and location</p>
+      </div>
+
+      <form onSubmit={handleUpdate} className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
+        {message && (
+          <div className={`p-4 rounded-xl text-sm font-bold ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+            {message.text}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="md:col-span-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Pharmacy Name</label>
+            <input 
+              type="text" 
+              value={profile.pharmacyName}
+              onChange={(e) => setProfile({...profile, pharmacyName: e.target.value})}
+              className="w-full p-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-emerald-500 outline-none transition"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Owner Name</label>
+            <input 
+              type="text" 
+              value={profile.ownerName}
+              onChange={(e) => setProfile({...profile, ownerName: e.target.value})}
+              className="w-full p-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-emerald-500 outline-none transition"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Phone</label>
+            <input 
+              type="text" 
+              value={profile.phone}
+              onChange={(e) => setProfile({...profile, phone: e.target.value})}
+              className="w-full p-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-emerald-500 outline-none transition"
+            />
+          </div>
+        </div>
+
+        <div className="pt-6 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+             <h3 className="font-bold text-gray-900 flex items-center gap-2">
+               <MapPin size={18} className="text-emerald-500" />
+               Store Location
+             </h3>
+             <button 
+              type="button"
+              onClick={detectLocation}
+              className="text-xs font-bold text-emerald-600 flex items-center gap-1 hover:underline font-sans"
+             >
+               <Navigation size={12} /> Detect Current
+             </button>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Longitude</label>
+              <input 
+                type="number" 
+                step="any"
+                value={profile.longitude}
+                onChange={(e) => setProfile({...profile, longitude: e.target.value})}
+                className="w-full p-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-emerald-500 outline-none transition"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Latitude</label>
+              <input 
+                type="number" 
+                step="any"
+                value={profile.latitude}
+                onChange={(e) => setProfile({...profile, latitude: e.target.value})}
+                className="w-full p-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-emerald-500 outline-none transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button 
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-emerald-700 transition flex items-center justify-center gap-3 disabled:opacity-70"
+        >
+          {isSubmitting ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={24} />}
+          {isSubmitting ? "Updating..." : "Save Settings"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar, onLogout }) {
   return (
     <aside
@@ -921,6 +1063,10 @@ export default function VendorPortal() {
             <Route
               path="orders"
               element={<VendorOrdersPage canManageInventory={canManageInventory} />}
+            />
+            <Route
+              path="settings"
+              element={<VendorSettingsPage vendor={vendor} />}
             />
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>

@@ -14,50 +14,59 @@ const LoginOuter = ({ mode = "login" }) => {
   const isRegisterMode = mode === "register";
 
   return (
-    <div className="min-h-screen bg-[#F7FAFB]">
-      <div className="LoginOuter px-4 pb-16 pt-10 text-center">
-        <div className="w-full max-w-6xl px-4 text-left">
+    <div className="min-h-screen bg-[#F0F4F8] selection:bg-blue-100">
+      <div className="LoginOuter px-4 pb-20 pt-12 flex flex-col items-center">
+        <div className="w-full max-w-7xl px-6 mb-4">
           <BackButton
-            label="Back"
-            onClick={() => navigate(isRegisterMode ? "/" : "/")}
+            label="Back to Home"
+            onClick={() => navigate("/")}
           />
         </div>
-        <div className="Logo mt-6">
-          <img className="Logo_Img" src={Users} alt="PharmaCare Logo" />
+        
+        <div className="Logo mb-8">
+          <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl transform hover:rotate-6 transition-transform duration-500">
+            <img className="w-20 h-20 object-contain" src={Users} alt="PharmaCare Logo" />
+          </div>
         </div>
-        <div className="Page_Header">
-          <h1 className="header text-5xl font-bold">Welcome to PharmaCare</h1>
-          <p className="mt-3 text-lg text-gray-600">
+
+        <div className="Page_Header max-w-3xl text-center mb-16">
+          <h1 className="text-6xl font-black tracking-tight text-slate-900 mb-6">
+            Welcome to <span className="text-[#009973]">PharmaCare</span>
+          </h1>
+          <p className="text-xl text-slate-500 font-medium leading-relaxed">
             {isRegisterMode
-              ? "Choose which role you want to register with"
-              : "Choose your role to get started with our healthcare platform"}
+              ? "Join our healthcare network today. Select a role that best describes you to begin your journey."
+              : "Access your healthcare portal. Please choose your role to proceed with personalized services."}
           </p>
         </div>
-        <div className="mt-12 grid grid-cols-1 gap-8 px-8 md:grid-cols-3">
-          <RoleCard
-            image={Customer}
-            title="I am a Customer"
-            description="Order medicines from verified pharmacies near you\nBrowse medicines\nCompare prices\nTrack orders"
-            btnText={isRegisterMode ? "Register as Customer" : "Continue as Customer"}
-            btnColor="bg-linear-to-r from-blue-500 via-blue-700 to-blue-500"
-            onClick={() => navigate(isRegisterMode ? "/customer-register" : "/customer-login")}
-          />
-          <RoleCard
-            image={Vendor}
-            title="I am a Pharmacy Vendor"
-            description="List your pharmacy on our platform\nManage inventory\nReceive orders\nConnect with customers"
-            btnText={isRegisterMode ? "Register as Vendor" : "Login as Vendor"}
-            btnColor="bg-linear-to-r from-green-500 via-green-600 to-green-400"
-            onClick={() => navigate(isRegisterMode ? "/vendor-register" : "/vendor-login")}
-          />
-          <RoleCard
-            image={Admin}
-            title="I am an Admin"
-            description="Manage users and pharmacies\nMonitor platform activity\nView analytics\nSystem configuration"
-            btnText={isRegisterMode ? "Register as Admin" : "Login as Admin"}
-            btnColor="bg-linear-to-r from-purple-500 via-purple-600 to-purple-400"
-            onClick={() => navigate(isRegisterMode ? "/admin-register" : "/admin-login")}
-          />
+
+        <div className="w-full max-w-6xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 px-4 items-stretch">
+            <RoleCard
+              image={Customer}
+              title="I am a Customer"
+              description={"• Order medicines online\n• Browse verified pharmacies\n• Compare local prices\n• Live order tracking"}
+              btnText={isRegisterMode ? "Register Now" : "Continue Login"}
+              btnColor="bg-gradient-to-r from-blue-600 to-indigo-600"
+              onClick={() => navigate(isRegisterMode ? "/customer-register" : "/customer-login")}
+            />
+            <RoleCard
+              image={Vendor}
+              title="I am a Vendor"
+              description={"• List your pharmacy\n• Digital inventory management\n• Process online orders\n• Grow your business"}
+              btnText={isRegisterMode ? "Join as Vendor" : "Vendor Portal"}
+              btnColor="bg-gradient-to-r from-emerald-500 to-teal-600"
+              onClick={() => navigate(isRegisterMode ? "/vendor-register" : "/vendor-login")}
+            />
+            <RoleCard
+              image={Admin}
+              title="I am an Admin"
+              description={"• System administration\n• User management\n• Business analytics\n• Security controls"}
+              btnText={isRegisterMode ? "Admin Request" : "Admin Panel"}
+              btnColor="bg-gradient-to-r from-slate-700 to-slate-900"
+              onClick={() => navigate(isRegisterMode ? "/admin-register" : "/admin-login")}
+            />
+          </div>
         </div>
       </div>
       <PharmaFooter />

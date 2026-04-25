@@ -37,12 +37,26 @@ const vendorSchema = new Schema(
             enum: ["pending", "approved", "rejected"],
             default: "pending"
 
+        },
+        location: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                default: 'Point'
+            },
+            coordinates: {
+                type: [Number], // [longitude, latitude]
+                required: true,
+                default: [0, 0]
+            }
         }
     },
     {
         timestamps: true
     }
 )
+
+vendorSchema.index({ location: "2dsphere" })
 
 vendorSchema.pre("save", async function (next) {
     if(!this.isModified("password")) return next();

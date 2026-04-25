@@ -14,8 +14,6 @@ import {
 const quickLinks = [
   { label: "Home", path: "/" },
   { label: "About Us", path: "/about" },
-  { label: "Support" },
-  { label: "AI Assistant" },
   { label: "Find Pharmacies", path: "/" },
 ];
 
@@ -103,14 +101,14 @@ export default function PharmaFooter() {
               <div className="flex items-start gap-3">
                 <MapPin size={16} className="mt-0.5 shrink-0" />
                 <p>
-                  123 Healthcare Ave
+                  Bennett University, C9 - 8th Floor,
                   <br />
-                  New York, NY 10001
+                  Room No. 817
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={16} className="shrink-0" />
-                <p>+1 (555) 123-4567</p>
+                <p>9821064440</p>
               </div>
               <div className="flex items-center gap-3">
                 <Mail size={16} className="shrink-0" />

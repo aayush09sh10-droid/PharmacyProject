@@ -59,18 +59,6 @@ export default function PharmaHeader({
       active: activePage === "about",
       onClick: () => navigate("/about"),
     },
-    {
-      icon: CircleHelp,
-      label: "Support",
-      active: false,
-      onClick: () => setIsMobileMenuOpen(false),
-    },
-    {
-      icon: Bot,
-      label: "AI Assistant",
-      active: false,
-      onClick: () => setIsMobileMenuOpen(false),
-    },
   ];
 
   useEffect(() => {

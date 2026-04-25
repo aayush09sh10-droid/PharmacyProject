@@ -11,6 +11,7 @@ import LandingPage from './components/Home/LandingPage.jsx'
 import AboutPage from './components/Home/AboutPage.jsx'
 import CartPage from './components/Shop/CartPage.jsx'
 import VendorPortal from './components/VendorPortal.jsx'
+import GeminiChat from './components/Assistant/GeminiChat.jsx'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/admin-register" element={<AdminRegister />} />
         <Route path="/admin-dashboard/*" element={<AdminPage />} />
       </Routes>
+      <GeminiChat />
     </Router>
   )
 }

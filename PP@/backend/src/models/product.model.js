@@ -8,6 +8,12 @@ const productSchema = new Schema(
             trim: true,
             index: true
         },
+        vendorId: {
+            type: Schema.Types.ObjectId,
+            ref: "Vendor",
+            required: true,
+            index: true
+        },
         category: {
             type: String,
             required: true,

@@ -118,9 +118,47 @@ const approveVendor = asyncHandler(async (req, res) => {
     );
 });
 
+const updateVendorProfile = asyncHandler(async (req, res) => {
+    const { pharmacyName, ownerName, phone, location } = req.body;
+
+    const updateFields = {};
+    if (pharmacyName) updateFields.pharmacyName = pharmacyName;
+    if (ownerName) updateFields.ownerName = ownerName;
+    if (phone) updateFields.phone = phone;
+    
+    if (location && Array.isArray(location.coordinates)) {
+        updateFields.location = {
+            type: "Point",
+            coordinates: [
+                parseFloat(location.coordinates[0]), // longitude
+                parseFloat(location.coordinates[1])  // latitude
+            ]
+        };
+    }
+
+    const vendor = await Vendor.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: updateFields
+        },
+        {
+            new: true
+        }
+    ).select("-password -refreshToken");
+
+    if (!vendor) {
+        throw new ApiError(404, "Vendor not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, vendor, "Vendor profile updated successfully")
+    );
+});
+
 export {
     loginVendor,
     registerVendor,
     getAllVendors,
-    approveVendor
+    approveVendor,
+    updateVendorProfile
 }

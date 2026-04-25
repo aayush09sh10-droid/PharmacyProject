@@ -8,9 +8,17 @@ const orderSchema = new Schema(
             unique: true,
             index: true
         },
-        customerName: {
-            type: String,
-            required: true
+        customerId: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+            index: true
+        },
+        pharmacyId: {
+            type: Schema.Types.ObjectId,
+            ref: "Vendor",
+            required: true,
+            index: true
         },
         items: [
             {

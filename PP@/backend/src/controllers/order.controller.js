@@ -4,9 +4,9 @@ import { ApiError } from "../utils/ApiError.js";
 import { Order } from "../models/order.model.js";
 
 const createOrder = asyncHandler(async (req, res) => {
-    const { customerName, items, totalAmount } = req.body;
+    const { customerId, pharmacyId, items, totalAmount } = req.body;
 
-    if (!customerName || !items || !totalAmount) {
+    if (!customerId || !pharmacyId || !items || !totalAmount) {
         throw new ApiError(400, "All fields are required");
     }
 
@@ -14,7 +14,8 @@ const createOrder = asyncHandler(async (req, res) => {
 
     const order = await Order.create({
         orderId,
-        customerName,
+        customerId,
+        pharmacyId,
         items,
         totalAmount
     });

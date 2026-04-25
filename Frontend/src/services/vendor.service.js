@@ -126,6 +126,19 @@ function logoutVendor() {
   clearVendorSession();
 }
 
+async function updateVendorProfile(payload) {
+  const response = await fetch(`${VENDOR_API_URL}/api/v1/vendors/profile`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getVendorAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+}
+
 export {
   clearVendorSession,
   createVendorProduct,
@@ -139,4 +152,5 @@ export {
   registerVendor,
   saveVendorSession,
   updateVendorProduct,
+  updateVendorProfile,
 };

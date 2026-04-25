@@ -26,12 +26,14 @@ import dashboardRouter from './routes/dashboard.routes.js'
 import orderRouter from './routes/order.routes.js'
 import productRouter from './routes/product.routes.js'
 import vendorRouter from './routes/vendor.routes.js'
+import pharmacyRouter from './routes/pharmacy.routes.js'
 
 //routes declaration
 app.use("/api/v1/dashboard", dashboardRouter)
 app.use("/api/v1/orders", orderRouter)
 app.use("/api/v1/products", productRouter)
 app.use("/api/v1/vendors", vendorRouter)
+app.use("/api/v1/pharmacies", pharmacyRouter)
 
 // Global Error Handler
 app.use((err, req, res, next) => {
