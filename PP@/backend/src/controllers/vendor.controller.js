@@ -120,6 +120,30 @@ const getCurrentVendor = asyncHandler(async (req, res) => {
     );
 });
 
+const verifyVendorCurrentPassword = asyncHandler(async (req, res) => {
+    const currentPassword = req.body?.currentPassword?.trim();
+
+    if (!currentPassword) {
+        throw new ApiError(400, "Current password is required");
+    }
+
+    const vendor = await Vendor.findById(req.user._id);
+
+    if (!vendor) {
+        throw new ApiError(404, "Vendor not found");
+    }
+
+    const isPasswordValid = await vendor.isPasswordCorrect(currentPassword);
+
+    if (!isPasswordValid) {
+        throw new ApiError(400, "Current password is incorrect");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, { verified: true }, "Password verified successfully")
+    );
+});
+
 const updateCurrentVendor = asyncHandler(async (req, res) => {
     const updates = {};
     const normalizedEmail = req.body?.email?.trim().toLowerCase();
@@ -267,6 +291,7 @@ export {
     loginVendor,
     registerVendor,
     getCurrentVendor,
+    verifyVendorCurrentPassword,
     updateCurrentVendor,
     changeVendorPassword,
     getAllVendors,

@@ -184,6 +184,30 @@ const getProfile = asyncHandler(async (req, res) => {
     )
 })
 
+const verifyCurrentPassword = asyncHandler(async (req, res) => {
+    const currentPassword = req.body?.currentPassword?.trim();
+
+    if (!currentPassword) {
+        throw new ApiError(400, "Current password is required");
+    }
+
+    const user = await User.findById(req.user._id).select("+password");
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(currentPassword);
+
+    if (!isPasswordValid) {
+        throw new ApiError(400, "Current password is incorrect");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, { verified: true }, "Password verified successfully")
+    );
+});
+
 const updateProfile = asyncHandler(async (req, res) => {
     const updates = {};
     const normalizedName = req.body?.name?.trim();
@@ -478,6 +502,7 @@ export {
     loginUser,
     logoutUser,
     getProfile,
+    verifyCurrentPassword,
     updateProfile,
     changePassword,
     deleteUser,

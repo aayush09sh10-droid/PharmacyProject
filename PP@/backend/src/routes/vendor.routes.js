@@ -3,6 +3,7 @@ import {
   loginVendor, 
   registerVendor,
   getCurrentVendor,
+  verifyVendorCurrentPassword,
   updateCurrentVendor,
   changeVendorPassword,
   getAllVendors,
@@ -19,6 +20,7 @@ router.route("/")
 router.route("/register").post(registerVendor);
 router.route("/login").post(loginVendor);
 router.route("/me").get(verifyVendorJWT, getCurrentVendor).patch(verifyVendorJWT, updateCurrentVendor);
+router.route("/verify-password").post(verifyVendorJWT, verifyVendorCurrentPassword);
 router.route("/change-password").patch(verifyVendorJWT, changeVendorPassword);
 router.route("/:id/approve").patch(verifyInternalRequest, approveVendor);
 router.route("/:id").delete(verifyInternalRequest, deleteVendor);

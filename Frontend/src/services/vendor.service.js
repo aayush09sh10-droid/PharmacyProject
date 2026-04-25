@@ -93,6 +93,19 @@ async function changeVendorPassword(payload) {
   return handleResponse(response);
 }
 
+async function verifyVendorPassword(payload) {
+  const response = await fetch(`${VENDOR_API_URL}/api/v1/vendors/verify-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getVendorAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+}
+
 async function fetchVendorProducts() {
   const response = await fetch(`${VENDOR_API_URL}/api/v1/products`, {
     headers: getVendorAuthHeaders(),
@@ -228,4 +241,5 @@ export {
   updateCurrentVendorProfile,
   updateVendorOrderStatus,
   updateVendorProduct,
+  verifyVendorPassword,
 };

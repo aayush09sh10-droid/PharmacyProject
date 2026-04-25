@@ -141,6 +141,25 @@ async function changeCurrentUserPassword(payload) {
   return handleResponse(response);
 }
 
+async function verifyCurrentUserPassword(payload) {
+  const token = localStorage.getItem("accessToken");
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}/api/v1/users/verify-password`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+}
+
 function saveAuthSession(data) {
   const normalized = normalizeSessionPayload(data);
   if (!normalized?.user || !normalized?.accessToken) {
@@ -183,4 +202,5 @@ export {
   saveAuthSession,
   saveStoredUser,
   updateCurrentUserProfile,
+  verifyCurrentUserPassword,
 };

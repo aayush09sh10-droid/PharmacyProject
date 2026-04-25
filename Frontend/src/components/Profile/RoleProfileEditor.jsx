@@ -28,9 +28,13 @@ export default function RoleProfileEditor({
   passwordMessage,
   error,
   detailItems = [],
+  onRequestEditAccess,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [activeEditor, setActiveEditor] = useState("details");
+  const [editAccessPassword, setEditAccessPassword] = useState("");
+  const [isUnlockingEditor, setIsUnlockingEditor] = useState(false);
+  const [editAccessError, setEditAccessError] = useState("");
   const badgeStyles = {
     emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
     violet: "border-violet-200 bg-violet-50 text-violet-700",
@@ -75,11 +79,42 @@ export default function RoleProfileEditor({
             </div>
             <button
               type="button"
-              onClick={() => setIsEditing((current) => !current)}
+              onClick={async () => {
+                if (isEditing) {
+                  setIsEditing(false);
+                  setActiveEditor("details");
+                  setEditAccessPassword("");
+                  setEditAccessError("");
+                  return;
+                }
+
+                setEditAccessError("");
+
+                if (!editAccessPassword.trim()) {
+                  setEditAccessError("Please enter your current password to continue.");
+                  return;
+                }
+
+                if (onRequestEditAccess) {
+                  try {
+                    setIsUnlockingEditor(true);
+                    await onRequestEditAccess(editAccessPassword);
+                    setIsEditing(true);
+                    setEditAccessPassword("");
+                    setEditAccessError("");
+                  } catch (requestError) {
+                    setEditAccessError(requestError.message || "Password verification failed.");
+                  } finally {
+                    setIsUnlockingEditor(false);
+                  }
+                } else {
+                  setIsEditing(true);
+                }
+              }}
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-emerald-500 to-teal-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-100 transition hover:opacity-95"
             >
               <PencilLine size={18} />
-              <span>{isEditing ? "Close Editor" : "Edit Profile"}</span>
+              <span>{isEditing ? "Close Editor" : isUnlockingEditor ? "Checking..." : "Edit Profile"}</span>
             </button>
           </div>
 
@@ -109,6 +144,23 @@ export default function RoleProfileEditor({
               <p className="mt-2 text-sm text-slate-500">
                 Inside the editor you can update your phone number and other visible data, or switch to password update when needed.
               </p>
+              <div className="mt-5 grid gap-3 sm:max-w-md">
+                <label>
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Current Password</span>
+                  <input
+                    type="password"
+                    value={editAccessPassword}
+                    onChange={(event) => setEditAccessPassword(event.target.value)}
+                    placeholder="Enter current password"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+                  />
+                </label>
+                {editAccessError ? (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {editAccessError}
+                  </div>
+                ) : null}
+              </div>
             </div>
           ) : (
             <div className="mt-6">

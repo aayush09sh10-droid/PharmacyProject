@@ -11,6 +11,7 @@ import {
   getStoredUser,
   saveStoredUser,
   updateCurrentUserProfile,
+  verifyCurrentUserPassword,
 } from "../../services/auth.service.js";
 import { getCartCount } from "../../services/cart.service.js";
 
@@ -170,6 +171,7 @@ export default function CustomerProfilePage() {
               profileMessage={profileMessage}
               passwordMessage={passwordMessage}
               error={error}
+              onRequestEditAccess={(currentPassword) => verifyCurrentUserPassword({ currentPassword })}
               detailItems={[
                 { label: "Customer Name", value: profile?.name },
                 { label: "Email", value: profile?.email },

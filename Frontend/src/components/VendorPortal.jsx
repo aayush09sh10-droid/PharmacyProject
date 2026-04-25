@@ -42,10 +42,12 @@ import {
   updateCurrentVendorProfile,
   updateVendorOrderStatus,
   updateVendorProduct,
+  verifyVendorPassword,
 } from "../services/vendor.service.js";
 import NotificationBell from "./Notifications/NotificationBell.jsx";
 import PharmaFooter from "./Layout/PharmaFooter.jsx";
 import RoleProfileEditor from "./Profile/RoleProfileEditor.jsx";
+import RevenueInsightsModal from "./Analytics/RevenueInsightsModal.jsx";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
@@ -140,6 +142,8 @@ const StatCard = ({ icon, value, label, color }) => {
 };
 
 function VendorDashboardPage({ stats, loading }) {
+  const [isRevenueOpen, setIsRevenueOpen] = useState(false);
+
   if (loading) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center text-gray-400">
@@ -167,6 +171,24 @@ function VendorDashboardPage({ stats, loading }) {
         <StatCard icon={AlertTriangle} value={stats.lowStockCount ?? 0} label="Low Stock Alerts" color="orange" />
         <StatCard icon={Package} value={stats.pendingOrders ?? 0} label="Pending Orders" color="purple" />
       </div>
+
+      <section className={`rounded-[1.75rem] p-5 sm:p-6 ${vendorShell.card}`}>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-emerald-950 sm:text-xl">Revenue Monitor</h3>
+            <p className="mt-1 text-sm text-slate-600">
+              Open the 7-day revenue graph and summary for this vendor.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsRevenueOpen(true)}
+            className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+          >
+            View Revenue Details
+          </button>
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className={`rounded-[1.75rem] p-4 sm:p-5 lg:col-span-2 ${vendorShell.card}`}>
@@ -273,6 +295,16 @@ function VendorDashboardPage({ stats, loading }) {
           </div>
         </div>
       </div>
+
+      <RevenueInsightsModal
+        title="Vendor Revenue Overview"
+        subtitle="Track how this vendor's order revenue has moved over the last seven days."
+        timeline={stats.revenueTimeline || []}
+        summary={stats.revenueSummary || {}}
+        isOpen={isRevenueOpen}
+        onClose={() => setIsRevenueOpen(false)}
+        accent="emerald"
+      />
     </div>
   );
 }
@@ -1008,6 +1040,7 @@ function VendorProfilePage({ vendor, onVendorUpdated }) {
       profileMessage={profileMessage}
       passwordMessage={passwordMessage}
       error={error}
+      onRequestEditAccess={(currentPassword) => verifyVendorPassword({ currentPassword })}
       detailItems={[
         { label: "Pharmacy", value: vendor?.pharmacyName },
         { label: "Owner", value: vendor?.ownerName },
@@ -1126,6 +1159,8 @@ export default function VendorPortal() {
     lowStockCount: 0,
     lowStockProducts: [],
     recentOrders: [],
+    revenueTimeline: [],
+    revenueSummary: {},
   });
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -1139,6 +1174,8 @@ export default function VendorPortal() {
         lowStockCount: data.lowStockCount || 0,
         lowStockProducts: data.lowStockProducts || [],
         recentOrders: data.recentOrders || [],
+        revenueTimeline: data.revenueTimeline || [],
+        revenueSummary: data.revenueSummary || {},
       });
     } catch (error) {
       console.error("Error fetching vendor dashboard stats:", error);

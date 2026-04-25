@@ -25,6 +25,7 @@ import {
   logoutUser,
   saveStoredUser,
   updateCurrentUserProfile,
+  verifyCurrentUserPassword,
 } from "../services/auth.service.js";
 import {
   fetchNotifications,
@@ -44,6 +45,7 @@ import {
 } from "../services/admin.service.js";
 import PharmaFooter from "./Layout/PharmaFooter.jsx";
 import RoleProfileEditor from "./Profile/RoleProfileEditor.jsx";
+import RevenueInsightsModal from "./Analytics/RevenueInsightsModal.jsx";
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
@@ -322,6 +324,7 @@ function DashboardPage() {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isRevenueOpen, setIsRevenueOpen] = useState(false);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -372,6 +375,24 @@ function DashboardPage() {
           </article>
         ))}
       </div>
+
+      <section className="rounded-[2rem] bg-white p-5 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Revenue Monitor</h2>
+            <p className="mt-2 text-sm text-slate-500 sm:text-base">
+              Open the platform revenue graph and summary from the dashboard.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsRevenueOpen(true)}
+            className="rounded-2xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-700"
+          >
+            View Revenue Details
+          </button>
+        </div>
+      </section>
 
       <div className="grid gap-6 xl:grid-cols-[1.6fr_0.75fr]">
         <section className="rounded-[2.25rem] bg-white p-5 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-8 lg:p-10">
@@ -429,6 +450,16 @@ function DashboardPage() {
           </div>
         </section>
       </div>
+
+      <RevenueInsightsModal
+        title="Admin Revenue Overview"
+        subtitle="Monitor total platform revenue movement across the last seven days."
+        timeline={dashboard.revenueTimeline || []}
+        summary={dashboard.revenueSummary || {}}
+        isOpen={isRevenueOpen}
+        onClose={() => setIsRevenueOpen(false)}
+        accent="violet"
+      />
     </div>
   );
 }
@@ -1116,6 +1147,7 @@ function AdminProfilePage({ onProfileUpdated }) {
         profileMessage={profileMessage}
         passwordMessage={passwordMessage}
         error={error}
+        onRequestEditAccess={(currentPassword) => verifyCurrentUserPassword({ currentPassword })}
         detailItems={[
           { label: "Admin Name", value: profile?.name },
           { label: "Email", value: profile?.email },

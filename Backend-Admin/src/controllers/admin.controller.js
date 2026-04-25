@@ -25,6 +25,57 @@ const getRelativeTime = (value) => {
   return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
 };
 
+const buildRevenueTimeline = (orders, days = 7) => {
+  const today = new Date();
+  const buckets = [];
+
+  for (let index = days - 1; index >= 0; index -= 1) {
+    const bucketDate = new Date(today);
+    bucketDate.setHours(0, 0, 0, 0);
+    bucketDate.setDate(today.getDate() - index);
+
+    buckets.push({
+      key: bucketDate.toISOString().slice(0, 10),
+      label: bucketDate.toLocaleDateString("en-IN", { weekday: "short" }),
+      fullLabel: bucketDate.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      }),
+      amount: 0,
+    });
+  }
+
+  const revenueByDay = new Map(buckets.map((item) => [item.key, item]));
+
+  orders.forEach((order) => {
+    const orderDate = new Date(order.createdAt);
+    orderDate.setHours(0, 0, 0, 0);
+    const key = orderDate.toISOString().slice(0, 10);
+    const bucket = revenueByDay.get(key);
+
+    if (bucket) {
+      bucket.amount += Number(order.totalAmount || 0);
+    }
+  });
+
+  return buckets;
+};
+
+const buildRevenueSummary = (timeline, totalRevenue) => {
+  const peakPoint = timeline.reduce(
+    (currentPeak, item) => (item.amount > currentPeak.amount ? item : currentPeak),
+    timeline[0] || { label: "N/A", amount: 0 },
+  );
+
+  return {
+    totalRevenue,
+    averageDailyRevenue: timeline.length ? totalRevenue / timeline.length : 0,
+    latestDayRevenue: timeline[timeline.length - 1]?.amount || 0,
+    peakRevenueDay: peakPoint.fullLabel || peakPoint.label || "N/A",
+    peakRevenueAmount: peakPoint.amount || 0,
+  };
+};
+
 const buildRecentActivity = ({ users, vendors, orders }) => {
   const userActivity = users.map((user) => ({
     id: `user-${user._id}`,
@@ -102,10 +153,13 @@ const fetchDashboardOverview = asyncHandler(async (req, res) => {
     const today = new Date();
     return created.toDateString() === today.toDateString();
   }).length;
-  const totalRevenue = vendorStats.totalRevenue ?? orders.reduce(
+  const revenueOrders = orders.filter((order) => order.status !== "Cancelled");
+  const totalRevenue = vendorStats.totalRevenue ?? revenueOrders.reduce(
     (sum, order) => sum + Number(order.totalAmount || 0),
     0,
   );
+  const revenueTimeline = buildRevenueTimeline(revenueOrders);
+  const revenueSummary = buildRevenueSummary(revenueTimeline, totalRevenue);
 
   const summary = {
     totalUsers: customerUsers.length,
@@ -153,6 +207,8 @@ const fetchDashboardOverview = asyncHandler(async (req, res) => {
       newUsersThisWeek,
       totalOrders: vendorStats.totalOrders ?? orders.length,
     }),
+    revenueTimeline,
+    revenueSummary,
   };
 
   return res
