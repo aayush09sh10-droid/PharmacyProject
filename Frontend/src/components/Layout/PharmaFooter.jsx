@@ -15,7 +15,7 @@ const quickLinks = [
   { label: "Home", path: "/" },
   { label: "About Us", path: "/about" },
   { label: "Support" },
-  { label: "AI Assistant" },
+  { label: "AI Assistant", path: "/ai-assistant" },
   { label: "Find Pharmacies", path: "/" },
 ];
 

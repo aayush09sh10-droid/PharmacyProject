@@ -100,8 +100,8 @@ export default function PharmaHeader({
     {
       icon: Bot,
       label: "AI Assistant",
-      active: false,
-      onClick: () => setIsMobileMenuOpen(false),
+      active: activePage === "ai",
+      onClick: () => navigate("/ai-assistant"),
     },
   ];
 

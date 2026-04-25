@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import PharmaHeader from "../Layout/PharmaHeader.jsx";
 import PharmaFooter from "../Layout/PharmaFooter.jsx";
 import BackButton from "../Layout/BackButton.jsx";
-import { getStoredUser } from "../../services/auth.service.js";
+import { clearAuthSession, getStoredUser } from "../../services/auth.service.js";
 import { getCartCount } from "../../services/cart.service.js";
 import { fetchCustomerOrders } from "../../services/order.service.js";
 
@@ -49,6 +49,12 @@ export default function CustomerOrdersPage() {
         const data = await fetchCustomerOrders();
         setOrders(Array.isArray(data) ? data : []);
       } catch (err) {
+        if (err.status === 401) {
+          clearAuthSession();
+          navigate("/customer-login", { replace: true });
+          return;
+        }
+
         setError(err.message || "Failed to load your orders");
       } finally {
         setLoading(false);

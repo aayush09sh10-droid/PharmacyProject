@@ -14,7 +14,14 @@ async function handleResponse(response) {
   }
 
   if (!response.ok) {
-    throw new Error(body.message || body.error || `Request failed with status ${response.status}`);
+    const error = new Error(body.message || body.error || `Request failed with status ${response.status}`);
+    error.status = response.status;
+
+    if (response.status === 401) {
+      clearAuthSession();
+    }
+
+    throw error;
   }
 
   return body.data;
@@ -84,6 +91,9 @@ async function logoutUser() {
 
 function saveAuthSession(data) {
   const normalized = normalizeSessionPayload(data);
+  if (!normalized?.user || !normalized?.accessToken) {
+    throw new Error("Invalid login response");
+  }
   localStorage.setItem("user", JSON.stringify(normalized.user));
   localStorage.setItem("accessToken", normalized.accessToken);
 }

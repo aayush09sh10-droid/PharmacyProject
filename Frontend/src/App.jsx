@@ -12,6 +12,7 @@ import AboutPage from './components/Home/AboutPage.jsx'
 import CartPage from './components/Shop/CartPage.jsx'
 import CustomerOrdersPage from './components/Shop/CustomerOrdersPage.jsx'
 import VendorPortal from './components/VendorPortal.jsx'
+import AIAssistantPage from './components/User/AIAssistant/AIAssistantPage.jsx'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/ai-assistant" element={<AIAssistantPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/my-orders" element={<CustomerOrdersPage />} />
         <Route path="/signin" element={<LoginOuter mode="login" />} />

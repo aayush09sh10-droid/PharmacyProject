@@ -2,7 +2,7 @@ import express from "express"
 import connectDB from "./config/mongo.config.js";
 import dotenv from "dotenv"
 import app from "./app.js"
-dotenv.config()
+dotenv.config({ path: new URL("../.env", import.meta.url) })
 // const app = express();
 app.use(express.json());
 
