@@ -52,6 +52,7 @@ export default function PharmaHeader({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [mobileProfileMenuOpen, setMobileProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
 
   useEffect(() => {
@@ -150,6 +151,7 @@ export default function PharmaHeader({
   const handleNavigate = (callback) => {
     callback();
     setIsMobileMenuOpen(false);
+    setMobileProfileMenuOpen(false);
   };
 
   const handleCustomerLogout = async () => {
@@ -161,6 +163,7 @@ export default function PharmaHeader({
       clearAuthSession();
       setCurrentUser(null);
       setProfileMenuOpen(false);
+      setMobileProfileMenuOpen(false);
       setIsMobileMenuOpen(false);
       navigate("/", { replace: true });
     }
@@ -442,34 +445,43 @@ export default function PharmaHeader({
                 panelClassName="left-0 right-auto mt-2 w-full max-w-full"
                 buttonClassName="relative inline-flex w-full items-center justify-center rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
               />
-              <div className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setMobileProfileMenuOpen((current) => !current)}
+                className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm"
+              >
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
                   {(customerUser.name || "C").charAt(0).toUpperCase()}
                 </div>
                 <span className="truncate">{customerUser.name || "Customer"}</span>
-                <ChevronDown size={16} className="shrink-0" />
-              </div>
-              <button
-                type="button"
-                onClick={() => handleNavigate(() => navigate("/profile"))}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              >
-                Profile
+                <ChevronDown size={16} className={`shrink-0 transition ${mobileProfileMenuOpen ? "rotate-180" : ""}`} />
               </button>
-              <button
-                type="button"
-                onClick={() => handleNavigate(() => navigate("/my-orders"))}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              >
-                My Orders
-              </button>
-              <button
-                type="button"
-                onClick={handleCustomerLogout}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              >
-                Logout
-              </button>
+              {mobileProfileMenuOpen ? (
+                <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Account</p>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(() => navigate("/profile"))}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Profile
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(() => navigate("/my-orders"))}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  >
+                    My Orders
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCustomerLogout}
+                    className="w-full rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
