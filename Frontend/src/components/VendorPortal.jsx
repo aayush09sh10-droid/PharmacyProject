@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
@@ -27,6 +27,7 @@ import {
 import {
   createVendorProduct,
   deleteVendorProduct,
+  fetchCurrentVendor,
   fetchVendorDashboardStats,
   fetchVendorNotifications,
   fetchVendorOrders,
@@ -35,6 +36,7 @@ import {
   logoutVendor,
   markAllVendorNotificationsAsRead,
   markVendorNotificationAsRead,
+  saveStoredVendor,
   updateVendorOrderStatus,
   updateVendorProduct,
 } from "../services/vendor.service.js";
@@ -981,7 +983,7 @@ function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar,
 
 export default function VendorPortal() {
   const navigate = useNavigate();
-  const vendor = useMemo(() => getStoredVendor(), []);
+  const [vendor, setVendor] = useState(() => getStoredVendor());
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -1027,9 +1029,33 @@ export default function VendorPortal() {
     }
   };
 
+  const syncVendorProfile = async () => {
+    try {
+      const freshVendor = await fetchCurrentVendor();
+      const normalizedVendor = {
+        ...freshVendor,
+        role: "Vendor",
+        name: freshVendor.ownerName || freshVendor.pharmacyName,
+      };
+
+      saveStoredVendor(freshVendor);
+      setVendor(normalizedVendor);
+    } catch (error) {
+      console.error("Error fetching vendor profile:", error);
+    }
+  };
+
   useEffect(() => {
     if (!vendor || vendor.role !== "Vendor") {
       navigate("/vendor-login", { replace: true });
+      return;
+    }
+
+    syncVendorProfile();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!vendor || vendor.role !== "Vendor") {
       return;
     }
 
@@ -1040,7 +1066,7 @@ export default function VendorPortal() {
 
     loadStats();
     loadNotifications();
-  }, [navigate, vendor]);
+  }, [vendor?.status]);
 
   useEffect(() => {
     if (!isMobileSidebarOpen) {
@@ -1054,6 +1080,17 @@ export default function VendorPortal() {
       document.body.style.overflow = originalOverflow;
     };
   }, [isMobileSidebarOpen]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      if (vendor?.role === "Vendor") {
+        syncVendorProfile();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [vendor?.role]);
 
   if (!vendor || vendor.role !== "Vendor") {
     return null;

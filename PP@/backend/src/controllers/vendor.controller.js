@@ -4,6 +4,8 @@ import { Vendor } from "../models/vendor.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { createNotification } from "../services/notification.service.js";
 
+const normalizePhone = (value) => value?.replace(/\D/g, "") || "";
+
 const loginVendor = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
@@ -55,11 +57,16 @@ const loginVendor = asyncHandler(async (req, res) => {
 
 const registerVendor = asyncHandler(async (req, res) => {
     const { email, password, pharmacyName, ownerName, phone } = req.body;
+    const normalizedPhone = normalizePhone(phone);
 
     if (
         [email, password, pharmacyName, ownerName, phone].some((field) => !field || field?.trim() === "")
     ) {
         throw new ApiError(400, "All fields are required");
+    }
+
+    if (!/^\d{10}$/.test(normalizedPhone)) {
+        throw new ApiError(400, "Phone number must be exactly 10 digits");
     }
 
     const existedVendor = await Vendor.findOne({ email });
@@ -73,7 +80,7 @@ const registerVendor = asyncHandler(async (req, res) => {
         password,
         pharmacyName,
         ownerName,
-        phone
+        phone: normalizedPhone
     });
 
     const createdVendor = await Vendor.findById(vendor._id).select("-password -refreshToken");
@@ -98,6 +105,18 @@ const registerVendor = asyncHandler(async (req, res) => {
 
     return res.status(201).json(
         new ApiResponse(201, createdVendor, "Vendor registered successfully")
+    );
+});
+
+const getCurrentVendor = asyncHandler(async (req, res) => {
+    const vendor = await Vendor.findById(req.user._id).select("-password -refreshToken");
+
+    if (!vendor) {
+        throw new ApiError(404, "Vendor not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, vendor, "Vendor profile fetched successfully")
     );
 });
 
@@ -164,6 +183,7 @@ const deleteVendor = asyncHandler(async (req, res) => {
 export {
     loginVendor,
     registerVendor,
+    getCurrentVendor,
     getAllVendors,
     approveVendor,
     deleteVendor

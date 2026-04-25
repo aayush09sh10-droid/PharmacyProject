@@ -17,6 +17,17 @@ function getVendorAuthHeaders() {
     : {};
 }
 
+function saveStoredVendor(vendor) {
+  localStorage.setItem(
+    "vendorUser",
+    JSON.stringify({
+      ...vendor,
+      role: "Vendor",
+      name: vendor.ownerName || vendor.pharmacyName,
+    }),
+  );
+}
+
 async function loginVendor(email, password) {
   const response = await fetch(`${VENDOR_API_URL}/api/v1/vendors/login`, {
     method: "POST",
@@ -45,6 +56,14 @@ async function fetchVendorDashboardStats() {
   const response = await fetch(`${VENDOR_API_URL}/api/v1/dashboard/stats`, {
     headers: getVendorAuthHeaders(),
   });
+  return handleResponse(response);
+}
+
+async function fetchCurrentVendor() {
+  const response = await fetch(`${VENDOR_API_URL}/api/v1/vendors/me`, {
+    headers: getVendorAuthHeaders(),
+  });
+
   return handleResponse(response);
 }
 
@@ -135,7 +154,7 @@ async function markAllVendorNotificationsAsRead() {
 
 function saveVendorSession(data) {
   const normalized = normalizeSessionPayload(data);
-  localStorage.setItem("vendorUser", JSON.stringify(normalized.user));
+  saveStoredVendor(normalized.user);
   localStorage.setItem("vendorAccessToken", normalized.accessToken);
 }
 
@@ -166,6 +185,7 @@ export {
   clearVendorSession,
   createVendorProduct,
   deleteVendorProduct,
+  fetchCurrentVendor,
   fetchVendorDashboardStats,
   fetchVendorNotifications,
   fetchVendorOrders,
@@ -176,6 +196,7 @@ export {
   markAllVendorNotificationsAsRead,
   markVendorNotificationAsRead,
   registerVendor,
+  saveStoredVendor,
   saveVendorSession,
   updateVendorOrderStatus,
   updateVendorProduct,

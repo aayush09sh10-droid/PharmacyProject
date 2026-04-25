@@ -21,6 +21,8 @@ export default function VendorRegister() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const normalizedPhone = phone.replace(/\D/g, "");
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
@@ -36,13 +38,18 @@ export default function VendorRegister() {
       return;
     }
 
+    if (!/^\d{10}$/.test(normalizedPhone)) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       await registerVendor({
         ownerName,
         pharmacyName,
-        phone,
+        phone: normalizedPhone,
         email,
         password,
       });
@@ -96,9 +103,10 @@ export default function VendorRegister() {
               name="phone"
               type="text"
               value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder="Phone number"
+              onChange={(event) => setPhone(event.target.value.replace(/\D/g, "").slice(0, 10))}
+              placeholder="10-digit phone number"
               icon="User"
+              autoComplete="tel"
             />
 
             <InputField
