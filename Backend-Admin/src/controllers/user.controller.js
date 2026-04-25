@@ -3,7 +3,7 @@ import axios from "axios";
 import { ApiError } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.util.js";
 import { ApiResponse } from "../utils/apiResponse.js";
-import { getAllOrders } from "../services/vendor.service.js";
+import { getAllOrders, updateOrderById } from "../services/vendor.service.js";
 
 const buildFallbackAssistantReply = (prompt) => {
     const normalizedPrompt = prompt.toLowerCase();
@@ -196,6 +196,47 @@ const fetchCustomerOrders = asyncHandler(async (req, res) => {
     );
 });
 
+const cancelCustomerOrder = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const reason = req.body?.reason?.trim() || "Cancelled by customer";
+    const orders = await getAllOrders();
+    const safeOrders = Array.isArray(orders) ? orders : [];
+
+    const order = safeOrders.find((entry) => {
+        const isSameOrder = String(entry._id) === String(id);
+        const sameCustomerId = entry.customerId && String(entry.customerId) === String(req.user._id);
+        const sameCustomerEmail = entry.customerEmail && entry.customerEmail === req.user.email;
+        return isSameOrder && (sameCustomerId || sameCustomerEmail);
+    });
+
+    if (!order) {
+        throw new ApiError(404, "Order not found");
+    }
+
+    if (order.status === "Cancelled") {
+        return res.status(200).json(
+            new ApiResponse(200, order, "Order is already cancelled")
+        );
+    }
+
+    if (!["Pending", "Processing"].includes(order.status)) {
+        throw new ApiError(400, "Only pending or processing orders can be cancelled");
+    }
+
+    const updatedOrder = await updateOrderById(id, {
+        status: "Cancelled",
+        cancellation: {
+            byRole: "User",
+            reason,
+            cancelledAt: new Date().toISOString(),
+        },
+    });
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedOrder, "Order cancelled successfully")
+    );
+});
+
 const askAiAssistant = asyncHandler(async (req, res) => {
     const prompt = req.body?.prompt?.trim();
     const apiKey = process.env.GEMINI_API_KEY?.trim();
@@ -291,4 +332,4 @@ const askAiAssistant = asyncHandler(async (req, res) => {
 });
 
 
-export {registerUser,loginUser,logoutUser,getProfile, deleteUser, fetchCustomerOrders, askAiAssistant}
+export {registerUser,loginUser,logoutUser,getProfile, deleteUser, fetchCustomerOrders, cancelCustomerOrder, askAiAssistant}

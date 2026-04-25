@@ -11,9 +11,11 @@ import {
   Clock,
   DollarSign,
   Edit2,
+  Eye,
   LayoutDashboard,
   Loader2,
   LogOut,
+  Menu,
   Package,
   Plus,
   Search,
@@ -609,6 +611,7 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
         items: order.items?.length || 0,
         total: order.totalAmount,
         paymentMethod: order.paymentMethod || "Cash on Delivery",
+        cancellation: order.cancellation || null,
       }));
       setOrders(mapped);
     } finally {
@@ -715,6 +718,12 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
                         <span className="font-medium text-gray-900">{order.paymentMethod || "Cash on Delivery"}</span>
                       </div>
                     </div>
+                    {order.cancellation?.byRole ? (
+                      <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        <p className="font-semibold">Cancelled by {order.cancellation.byRole}</p>
+                        <p className="mt-1">{order.cancellation.reason || "No reason provided"}</p>
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className="flex items-center justify-between gap-4 border-t border-gray-100 pt-4 lg:ml-5 lg:min-w-[120px] lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
@@ -735,7 +744,16 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
                         <button
                           type="button"
                           disabled={updatingOrderId === order.rawId}
-                          onClick={() => handleStatusUpdate(order.rawId, { status: "Cancelled" })}
+                          onClick={() =>
+                            handleStatusUpdate(order.rawId, {
+                              status: "Cancelled",
+                              cancellation: {
+                                byRole: "Vendor",
+                                reason: "Rejected by vendor",
+                                cancelledAt: new Date().toISOString(),
+                              },
+                            })
+                          }
                           className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
                         >
                           <X size={16} />
@@ -768,7 +786,7 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
 function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar, onLogout }) {
   return (
     <aside
-      className={`flex flex-col border-r border-gray-200 bg-white transition-all duration-300 ${
+      className={`flex h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ${
         isCollapsed ? "w-14 sm:w-16" : "w-44 sm:w-52"
       }`}
     >
@@ -862,6 +880,7 @@ export default function VendorPortal() {
   const navigate = useNavigate();
   const vendor = useMemo(() => getStoredVendor(), []);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -904,6 +923,19 @@ export default function VendorPortal() {
     loadStats();
   }, [navigate, vendor]);
 
+  useEffect(() => {
+    if (!isMobileSidebarOpen) {
+      return undefined;
+    }
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isMobileSidebarOpen]);
+
   if (!vendor || vendor.role !== "Vendor") {
     return null;
   }
@@ -911,19 +943,57 @@ export default function VendorPortal() {
   const canManageInventory = vendor.status === "approved";
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans">
-      <VendorSidebar
-        vendor={vendor}
-        canManageInventory={canManageInventory}
-        isCollapsed={isCollapsed}
-        toggleSidebar={() => setIsCollapsed((current) => !current)}
-        onLogout={() => {
-          logoutVendor();
-          navigate("/vendor-login", { replace: true });
-        }}
+    <div className="flex min-h-screen bg-slate-50 font-sans">
+      <div
+        className={`fixed inset-0 z-30 bg-slate-950/40 transition md:hidden ${
+          isMobileSidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={() => setIsMobileSidebarOpen(false)}
       />
+      <div
+        className={`fixed inset-y-0 left-0 z-40 md:hidden ${
+          isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-200`}
+      >
+        <VendorSidebar
+          vendor={vendor}
+          canManageInventory={canManageInventory}
+          isCollapsed={false}
+          toggleSidebar={() => setIsMobileSidebarOpen(false)}
+          onLogout={() => {
+            logoutVendor();
+            navigate("/vendor-login", { replace: true });
+          }}
+        />
+      </div>
 
-      <main className="flex flex-1 flex-col overflow-hidden bg-slate-50">
+      <div className="hidden md:block">
+        <VendorSidebar
+          vendor={vendor}
+          canManageInventory={canManageInventory}
+          isCollapsed={isCollapsed}
+          toggleSidebar={() => setIsCollapsed((current) => !current)}
+          onLogout={() => {
+            logoutVendor();
+            navigate("/vendor-login", { replace: true });
+          }}
+        />
+      </div>
+
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-slate-50">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 shadow-sm md:hidden">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Vendor Portal</p>
+            <h1 className="truncate text-lg font-bold text-slate-900">{vendor.pharmacyName || "Vendor"}</h1>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 text-slate-700"
+          >
+            <Menu size={18} />
+          </button>
+        </div>
         <div className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6">
           <Routes>
             <Route index element={<Navigate to="dashboard" replace />} />

@@ -18,4 +18,17 @@ async function fetchCustomerOrders() {
   return handleResponse(response);
 }
 
-export { fetchCustomerOrders };
+async function cancelCustomerOrder(orderId, reason) {
+  const response = await fetch(`${API_URL}/api/v1/users/orders/${orderId}/cancel`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ reason }),
+  });
+
+  return handleResponse(response);
+}
+
+export { cancelCustomerOrder, fetchCustomerOrders };

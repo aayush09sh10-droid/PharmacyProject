@@ -4,6 +4,30 @@ import { ApiError } from "../utils/ApiError.js";
 import { Order } from "../models/order.model.js";
 import { Product } from "../models/product.model.js";
 
+const INTERNAL_REQUEST_HEADER = "x-api-key";
+
+const isInternalRequest = (req) =>
+    req.headers[INTERNAL_REQUEST_HEADER] &&
+    req.headers[INTERNAL_REQUEST_HEADER] === process.env.INTERNAL_API_KEY;
+
+const buildOrderQuery = (req, orderId) => (
+    isInternalRequest(req)
+        ? { _id: orderId }
+        : { _id: orderId, vendor: req.user._id }
+);
+
+const canTransitionOrderStatus = (currentStatus, nextStatus) => {
+    if (!nextStatus || currentStatus === nextStatus) {
+        return true;
+    }
+
+    if (currentStatus === "Cancelled" || currentStatus === "Delivered") {
+        return false;
+    }
+
+    return true;
+};
+
 const createOrder = asyncHandler(async (req, res) => {
     const { customerId, customerName, customerEmail, items, paymentMethod, vendorId } = req.body;
 
@@ -68,9 +92,7 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 
 const getAllOrders = asyncHandler(async (req, res) => {
-    const isInternalRequest = req.headers["x-api-key"] && req.headers["x-api-key"] === process.env.INTERNAL_API_KEY;
-
-    const orderFilter = isInternalRequest ? {} : { vendor: req.user._id };
+    const orderFilter = isInternalRequest(req) ? {} : { vendor: req.user._id };
     const orders = await Order.find(orderFilter).sort({ createdAt: -1 });
 
     return res.status(200).json(
@@ -93,23 +115,51 @@ const getOrderById = asyncHandler(async (req, res) => {
 
 const updateOrderStatus = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { status, paymentStatus, paymentMethod } = req.body;
+    const { status, paymentStatus, paymentMethod, cancellation } = req.body;
+
+    const existingOrder = await Order.findOne(buildOrderQuery(req, id));
+
+    if (!existingOrder) {
+        throw new ApiError(404, "Order not found");
+    }
+
+    if (!canTransitionOrderStatus(existingOrder.status, status)) {
+        throw new ApiError(400, `Order cannot be changed from ${existingOrder.status}`);
+    }
+
+    const nextUpdate = {};
+
+    if (status) {
+        nextUpdate.status = status;
+    }
+
+    if (paymentStatus) {
+        nextUpdate.paymentStatus = paymentStatus;
+    }
+
+    if (paymentMethod) {
+        nextUpdate.paymentMethod = paymentMethod;
+    }
+
+    if (status === "Cancelled") {
+        nextUpdate.cancellation = {
+            byRole: cancellation?.byRole || existingOrder.cancellation?.byRole || "Vendor",
+            reason: cancellation?.reason || existingOrder.cancellation?.reason || "Order cancelled",
+            cancelledAt: cancellation?.cancelledAt || existingOrder.cancellation?.cancelledAt || new Date(),
+        };
+
+        if (existingOrder.paymentStatus === "Paid" && !paymentStatus) {
+            nextUpdate.paymentStatus = "Refunded";
+        }
+    }
 
     const order = await Order.findOneAndUpdate(
-        { _id: id, vendor: req.user._id },
+        buildOrderQuery(req, id),
         {
-            $set: {
-                status,
-                paymentStatus,
-                paymentMethod
-            }
+            $set: nextUpdate
         },
         { new: true }
     );
-
-    if (!order) {
-        throw new ApiError(404, "Order not found");
-    }
 
     return res.status(200).json(
         new ApiResponse(200, order, "Order status updated successfully")

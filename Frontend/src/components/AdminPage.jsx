@@ -7,6 +7,7 @@ import {
   DollarSign,
   LayoutDashboard,
   LogOut,
+  Menu,
   ShieldCheck,
   ShoppingBag,
   Store,
@@ -58,40 +59,65 @@ function formatMetricValue(card) {
     return `Rs ${value.toFixed(2)}`;
   }
 
-  const numeric = Number(card.value || 0);
-  return numeric.toLocaleString();
+  return Number(card.value || 0).toLocaleString();
 }
 
-function AdminSidebar({ adminName, onLogout, isLoggingOut }) {
-  return (
-    <aside className="flex h-screen w-[300px] flex-col border-r border-slate-200 bg-white">
-      <div className="border-b border-slate-200 px-6 py-6">
-        <h1 className="text-[1.7rem] font-bold tracking-tight text-slate-900">Admin Portal</h1>
-        <p className="mt-1 text-[1rem] text-slate-500">{adminName || "Admin"}</p>
+function getOrderStatusTone(status) {
+  switch (status) {
+    case "Delivered":
+      return "bg-emerald-50 text-emerald-700";
+    case "Cancelled":
+      return "bg-rose-50 text-rose-700";
+    case "Processing":
+      return "bg-blue-50 text-blue-700";
+    case "Shipped":
+      return "bg-violet-50 text-violet-700";
+    default:
+      return "bg-amber-50 text-amber-700";
+  }
+}
 
-        <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-violet-300 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-700">
-          <ShieldCheck size={16} />
-          <span>Super Admin</span>
+function AdminSidebar({ adminName, onLogout, isLoggingOut, isMobileOpen, onClose }) {
+  const sidebarBody = (
+    <>
+      <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
+        <div className="flex items-start justify-between gap-3 lg:block">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.7rem]">Admin Portal</h1>
+            <p className="mt-1 text-sm text-slate-500 sm:text-base">{adminName || "Admin"}</p>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-violet-300 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-700">
+              <ShieldCheck size={16} />
+              <span>Super Admin</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 text-slate-600 lg:hidden"
+          >
+            <X size={18} />
+          </button>
         </div>
       </div>
 
-      <nav className="flex-1 px-4 py-4">
-        <div className="space-y-2.5">
+      <nav className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">
+        <div className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
                 key={item.path}
                 to={`/admin-dashboard/${item.path}`}
+                onClick={onClose}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-[1.5rem] px-5 py-4 text-[0.98rem] font-semibold transition ${
+                  `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition sm:px-5 sm:py-4 sm:text-[0.98rem] ${
                     isActive
                       ? "bg-linear-to-r from-fuchsia-500 to-violet-600 text-white shadow-[0_18px_40px_rgba(124,58,237,0.35)]"
                       : "text-slate-600 hover:bg-slate-50"
                   }`
                 }
               >
-                <Icon size={20} />
+                <Icon size={18} />
                 <span>{item.name}</span>
               </NavLink>
             );
@@ -99,29 +125,40 @@ function AdminSidebar({ adminName, onLogout, isLoggingOut }) {
         </div>
       </nav>
 
-      <div className="border-t border-slate-200 px-4 py-4">
-        <button
-          type="button"
-          className="flex w-full items-center gap-3 rounded-2xl px-5 py-3.5 text-left text-[0.98rem] font-medium text-slate-500 transition hover:bg-slate-50"
-        >
-          <X size={18} />
-          <span>Collapse</span>
-        </button>
+      <div className="border-t border-slate-200 px-3 py-4 sm:px-4">
         <button
           type="button"
           onClick={onLogout}
           disabled={isLoggingOut}
-          className="mt-3 flex w-full items-center gap-3 rounded-2xl px-5 py-3.5 text-left text-[0.98rem] font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-70"
+          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-70 sm:px-5 sm:py-3.5 sm:text-[0.98rem]"
         >
           <LogOut size={18} />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      <div
+        className={`fixed inset-0 z-30 bg-slate-950/45 transition lg:hidden ${
+          isMobileOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={onClose}
+      />
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-[19rem] max-w-[86vw] flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-200 lg:static lg:z-auto lg:h-screen lg:w-[300px] lg:max-w-none lg:translate-x-0 lg:shadow-none ${
+          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {sidebarBody}
+      </aside>
+    </>
   );
 }
 
-function AdminTopbar() {
+function AdminTopbar({ onOpenMenu }) {
   const location = useLocation();
   const currentSection = useMemo(
     () => menuItems.find((item) => location.pathname.includes(item.path))?.name || "Dashboard",
@@ -129,10 +166,23 @@ function AdminTopbar() {
   );
 
   return (
-    <div className="flex items-start justify-between border-b border-slate-200 bg-white px-8 py-6 shadow-sm">
-      <div>
-        <h1 className="text-[3.2rem] font-bold tracking-tight text-slate-900">{currentSection}</h1>
-        <p className="mt-2 text-[1.05rem] text-slate-500">Platform administration and management</p>
+    <div className="flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-6 lg:px-8 lg:py-6">
+      <div className="flex min-w-0 items-start gap-3">
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-300 text-slate-700 lg:hidden"
+        >
+          <Menu size={18} />
+        </button>
+        <div className="min-w-0">
+          <h1 className="truncate text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[3.2rem]">
+            {currentSection}
+          </h1>
+          <p className="mt-1 text-sm text-slate-500 sm:text-base lg:mt-2 lg:text-[1.05rem]">
+            Platform administration and management
+          </p>
+        </div>
       </div>
       <button
         type="button"
@@ -166,53 +216,53 @@ function DashboardPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-10 text-xl text-slate-500">Loading dashboard...</div>;
+    return <div className="p-6 text-base text-slate-500 sm:p-10 sm:text-xl">Loading dashboard...</div>;
   }
 
   if (error) {
-    return <div className="m-10 rounded-3xl border border-red-200 bg-red-50 p-8 text-lg text-red-700">{error}</div>;
+    return <div className="m-4 rounded-3xl border border-red-200 bg-red-50 p-6 text-base text-red-700 sm:m-10 sm:p-8 sm:text-lg">{error}</div>;
   }
 
   return (
-    <div className="space-y-10 p-10">
-      <div className="grid gap-7 xl:grid-cols-4">
+    <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:space-y-10 lg:p-10">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {dashboard.summaryCards.map((card) => (
           <article
             key={card.key}
-            className="rounded-[2rem] bg-white p-7 shadow-[0_20px_45px_rgba(148,163,184,0.18)]"
+            className="rounded-[2rem] bg-white p-5 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-7"
           >
-            <div className="flex items-start justify-between">
-              <div className={`flex h-12 w-12 items-center justify-center rounded-[1rem] ${cardStyles[card.tone]}`}>
-                {card.key === "users" ? <Users size={24} /> : null}
-                {card.key === "vendors" ? <Store size={24} /> : null}
-                {card.key === "orders" ? <ShoppingBag size={24} /> : null}
-                {card.key === "revenue" ? <DollarSign size={24} /> : null}
+            <div className="flex items-start justify-between gap-3">
+              <div className={`flex h-11 w-11 items-center justify-center rounded-[1rem] sm:h-12 sm:w-12 ${cardStyles[card.tone]}`}>
+                {card.key === "users" ? <Users size={22} /> : null}
+                {card.key === "vendors" ? <Store size={22} /> : null}
+                {card.key === "orders" ? <ShoppingBag size={22} /> : null}
+                {card.key === "revenue" ? <DollarSign size={22} /> : null}
               </div>
-              <div className="rounded-full bg-emerald-100 px-4 py-1.5 text-lg font-semibold text-emerald-700">
+              <div className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700 sm:px-4 sm:py-1.5 sm:text-lg">
                 {card.change}
               </div>
             </div>
-            <h2 className="mt-7 text-[2.6rem] font-bold tracking-tight text-slate-900">
+            <h2 className="mt-5 text-3xl font-bold tracking-tight text-slate-900 sm:mt-7 sm:text-[2.6rem]">
               {formatMetricValue(card)}
             </h2>
-            <p className="mt-2 text-[1rem] text-slate-500">{card.label}</p>
+            <p className="mt-2 text-sm text-slate-500 sm:text-base">{card.label}</p>
           </article>
         ))}
       </div>
 
-      <div className="grid gap-8 xl:grid-cols-[1.6fr_0.75fr]">
-        <section className="rounded-[2.25rem] bg-white p-10 shadow-[0_20px_45px_rgba(148,163,184,0.18)]">
-          <h2 className="text-[2.25rem] font-bold tracking-tight text-slate-900">Recent Activity</h2>
+      <div className="grid gap-6 xl:grid-cols-[1.6fr_0.75fr]">
+        <section className="rounded-[2.25rem] bg-white p-5 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-8 lg:p-10">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[2.25rem]">Recent Activity</h2>
 
-          <div className="mt-8 space-y-5">
+          <div className="mt-6 space-y-4 sm:mt-8 sm:space-y-5">
             {dashboard.recentActivity.map((activity) => (
               <article
                 key={activity.id}
-                className="flex items-center justify-between rounded-[1.75rem] border border-slate-200 px-7 py-6"
+                className="flex flex-col gap-3 rounded-[1.75rem] border border-slate-200 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-6"
               >
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-4 sm:gap-5">
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                    className={`flex h-11 w-11 items-center justify-center rounded-full sm:h-12 sm:w-12 ${
                       activity.type === "user"
                         ? "bg-blue-100 text-blue-600"
                         : activity.type === "vendor"
@@ -224,33 +274,33 @@ function DashboardPage() {
                     {activity.type === "vendor" ? <Store size={20} /> : null}
                     {activity.type === "order" ? <ShoppingBag size={20} /> : null}
                   </div>
-                  <div>
-                    <h3 className="text-[1.18rem] font-semibold text-slate-900">{activity.title}</h3>
-                    <p className="mt-1 text-[1rem] text-slate-500">{activity.subtitle}</p>
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-semibold text-slate-900 sm:text-[1.18rem]">{activity.title}</h3>
+                    <p className="mt-1 break-words text-sm text-slate-500 sm:text-base">{activity.subtitle}</p>
                   </div>
                 </div>
-                <p className="text-base text-slate-400">{activity.timeAgo}</p>
+                <p className="text-sm text-slate-400 sm:text-base">{activity.timeAgo}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="rounded-[2.25rem] bg-white p-10 shadow-[0_20px_45px_rgba(148,163,184,0.18)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[2.1rem] font-bold tracking-tight text-slate-900">System Alerts</h2>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-500">
+        <section className="rounded-[2.25rem] bg-white p-5 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-8 lg:p-10">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[2.1rem]">System Alerts</h2>
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-amber-500 sm:h-12 sm:w-12">
               <AlertTriangle size={22} />
             </div>
           </div>
 
-          <div className="mt-8 space-y-5">
+          <div className="mt-6 space-y-4 sm:mt-8 sm:space-y-5">
             {dashboard.systemAlerts.map((alert) => (
               <article
                 key={alert.id}
-                className={`rounded-[1.6rem] border px-6 py-5 ${alertStyles[alert.tone]}`}
+                className={`rounded-[1.6rem] border px-5 py-4 sm:px-6 sm:py-5 ${alertStyles[alert.tone]}`}
               >
-                <h3 className="text-[1.35rem] font-semibold">{alert.title}</h3>
-                <p className="mt-2 text-lg opacity-90">{alert.subtitle}</p>
+                <h3 className="text-lg font-semibold sm:text-[1.35rem]">{alert.title}</h3>
+                <p className="mt-2 text-sm opacity-90 sm:text-lg">{alert.subtitle}</p>
               </article>
             ))}
           </div>
@@ -260,41 +310,69 @@ function DashboardPage() {
   );
 }
 
-function DataTablePage({ title, subtitle, columns, rows, loading, emptyText, actionRenderer }) {
+function DataTablePage({ title, subtitle, columns, rows, loading, emptyText, actionRenderer, mobileSummary }) {
   return (
-    <div className="p-10">
-      <section className="rounded-[2.25rem] bg-white p-10 shadow-[0_20px_45px_rgba(148,163,184,0.18)]">
-        <h2 className="text-[2.15rem] font-bold tracking-tight text-slate-900">{title}</h2>
-        <p className="mt-2 text-xl text-slate-500">{subtitle}</p>
+    <div className="p-4 sm:p-6 lg:p-10">
+      <section className="rounded-[2.25rem] bg-white p-5 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-8 lg:p-10">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[2.15rem]">{title}</h2>
+        <p className="mt-2 text-sm text-slate-500 sm:text-lg lg:text-xl">{subtitle}</p>
 
         {loading ? (
-          <div className="mt-8 text-lg text-slate-500">Loading...</div>
+          <div className="mt-8 text-base text-slate-500 sm:text-lg">Loading...</div>
         ) : rows.length === 0 ? (
-          <div className="mt-8 text-lg text-slate-500">{emptyText}</div>
+          <div className="mt-8 text-base text-slate-500 sm:text-lg">{emptyText}</div>
         ) : (
-          <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-slate-200">
-            <div className="grid bg-slate-50 px-6 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-slate-500" style={{ gridTemplateColumns: `${columns.map((column) => column.width || "1fr").join(" ")}` }}>
-              {columns.map((column) => (
-                <div key={column.key}>{column.label}</div>
-              ))}
-            </div>
-            <div className="divide-y divide-slate-200">
+          <>
+            <div className="mt-8 space-y-4 lg:hidden">
               {rows.map((row, index) => (
-                <div
+                <article
                   key={row.id || row._id || index}
-                  className="grid items-center px-6 py-5 text-[1.03rem] text-slate-700"
-                  style={{ gridTemplateColumns: `${columns.map((column) => column.width || "1fr").join(" ")}` }}
+                  className="rounded-[1.5rem] border border-slate-200 px-4 py-4"
                 >
-                  {columns.map((column) => (
-                    <div key={column.key}>
-                      {column.render ? column.render(row) : row[column.key]}
-                    </div>
-                  ))}
-                  {actionRenderer ? <div>{actionRenderer(row)}</div> : null}
-                </div>
+                  <div className="space-y-3">
+                    {columns.map((column) => (
+                      <div key={column.key} className="flex items-start justify-between gap-4">
+                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                          {column.label}
+                        </span>
+                        <div className="min-w-0 text-right text-sm text-slate-700">
+                          {column.render ? column.render(row) : row[column.key]}
+                        </div>
+                      </div>
+                    ))}
+                    {mobileSummary ? <div>{mobileSummary(row)}</div> : null}
+                    {actionRenderer ? <div className="pt-2">{actionRenderer(row)}</div> : null}
+                  </div>
+                </article>
               ))}
             </div>
-          </div>
+
+            <div className="mt-8 hidden overflow-hidden rounded-[1.5rem] border border-slate-200 lg:block">
+              <div
+                className="grid bg-slate-50 px-6 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-slate-500"
+                style={{ gridTemplateColumns: `${columns.map((column) => column.width || "1fr").join(" ")}${actionRenderer ? " auto" : ""}` }}
+              >
+                {columns.map((column) => (
+                  <div key={column.key}>{column.label}</div>
+                ))}
+                {actionRenderer ? <div>Actions</div> : null}
+              </div>
+              <div className="divide-y divide-slate-200">
+                {rows.map((row, index) => (
+                  <div
+                    key={row.id || row._id || index}
+                    className="grid items-center px-6 py-5 text-[1.03rem] text-slate-700"
+                    style={{ gridTemplateColumns: `${columns.map((column) => column.width || "1fr").join(" ")}${actionRenderer ? " auto" : ""}` }}
+                  >
+                    {columns.map((column) => (
+                      <div key={column.key}>{column.render ? column.render(row) : row[column.key]}</div>
+                    ))}
+                    {actionRenderer ? <div>{actionRenderer(row)}</div> : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
         )}
       </section>
     </div>
@@ -327,33 +405,33 @@ function VendorVerificationPage() {
   const pendingVendors = vendors.filter((vendor) => vendor.status !== "approved");
 
   return (
-    <div className="p-10">
-      <section className="rounded-[2.25rem] bg-white p-10 shadow-[0_20px_45px_rgba(148,163,184,0.18)]">
-        <h2 className="text-[2.15rem] font-bold tracking-tight text-slate-900">Vendor Verification</h2>
-        <p className="mt-2 text-xl text-slate-500">
+    <div className="p-4 sm:p-6 lg:p-10">
+      <section className="rounded-[2.25rem] bg-white p-5 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-8 lg:p-10">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[2.15rem]">Vendor Verification</h2>
+        <p className="mt-2 text-sm text-slate-500 sm:text-lg lg:text-xl">
           Vendors are approved here before inventory becomes available to them.
         </p>
 
         {error ? (
-          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-lg text-red-700">
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-base text-red-700 sm:text-lg">
             {error}
           </div>
         ) : null}
 
         {loading ? (
-          <div className="mt-8 text-lg text-slate-500">Loading vendor registrations...</div>
+          <div className="mt-8 text-base text-slate-500 sm:text-lg">Loading vendor registrations...</div>
         ) : pendingVendors.length === 0 ? (
-          <div className="mt-8 text-lg text-slate-500">No pending vendor registrations right now.</div>
+          <div className="mt-8 text-base text-slate-500 sm:text-lg">No pending vendor registrations right now.</div>
         ) : (
           <div className="mt-8 space-y-5">
             {pendingVendors.map((vendor) => (
               <article
                 key={vendor._id}
-                className="flex items-center justify-between rounded-[1.75rem] border border-slate-200 px-7 py-6"
+                className="flex flex-col gap-4 rounded-[1.75rem] border border-slate-200 px-5 py-5 sm:px-7 sm:py-6 lg:flex-row lg:items-center lg:justify-between"
               >
-                <div>
-                  <h3 className="text-[1.35rem] font-semibold text-slate-900">{vendor.pharmacyName}</h3>
-                  <p className="mt-1 text-lg text-slate-500">
+                <div className="min-w-0">
+                  <h3 className="text-xl font-semibold text-slate-900 sm:text-[1.35rem]">{vendor.pharmacyName}</h3>
+                  <p className="mt-1 break-words text-sm text-slate-500 sm:text-lg">
                     {vendor.ownerName} • {vendor.email} • {vendor.phone}
                   </p>
                 </div>
@@ -367,7 +445,7 @@ function VendorVerificationPage() {
                       setError(err.message || "Failed to approve vendor");
                     }
                   }}
-                  className="rounded-2xl bg-violet-600 px-6 py-4 text-lg font-semibold text-white transition hover:bg-violet-700"
+                  className="w-full rounded-2xl bg-violet-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-violet-700 sm:w-auto sm:py-4 sm:text-lg"
                 >
                   Approve Vendor
                 </button>
@@ -416,7 +494,7 @@ function UsersPage() {
             await deleteAdminUser(row._id);
             setRows((current) => current.filter((user) => user._id !== row._id));
           }}
-          className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+          className="w-full rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 lg:w-auto"
         >
           Delete
         </button>
@@ -461,7 +539,7 @@ function VendorsPage() {
             await deleteVendor(row._id);
             setRows((current) => current.filter((vendor) => vendor._id !== row._id));
           }}
-          className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+          className="w-full rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 lg:w-auto"
         >
           Delete
         </button>
@@ -495,7 +573,21 @@ function OrdersPage() {
       columns={[
         { key: "orderId", label: "Order", width: "1fr" },
         { key: "customerName", label: "Customer", width: "1fr" },
-        { key: "status", label: "Status", width: "0.8fr" },
+        {
+          key: "status",
+          label: "Status",
+          width: "0.8fr",
+          render: (row) => (
+            <div className="space-y-2">
+              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusTone(row.status)}`}>
+                {row.status}
+              </span>
+              {row.cancellation?.byRole ? (
+                <p className="text-xs text-slate-500">By {row.cancellation.byRole}</p>
+              ) : null}
+            </div>
+          ),
+        },
         {
           key: "totalAmount",
           label: "Amount",
@@ -504,6 +596,13 @@ function OrdersPage() {
         },
         { key: "paymentMethod", label: "Method", width: "1fr" },
       ]}
+      mobileSummary={(row) =>
+        row.cancellation?.byRole ? (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            Cancelled by {row.cancellation.byRole}: {row.cancellation.reason || "No reason provided"}
+          </div>
+        ) : null
+      }
     />
   );
 }
@@ -566,11 +665,11 @@ function ReportsPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-10 text-xl text-slate-500">Loading reports...</div>;
+    return <div className="p-6 text-base text-slate-500 sm:p-10 sm:text-xl">Loading reports...</div>;
   }
 
   if (error) {
-    return <div className="m-10 rounded-3xl border border-red-200 bg-red-50 p-8 text-lg text-red-700">{error}</div>;
+    return <div className="m-4 rounded-3xl border border-red-200 bg-red-50 p-6 text-base text-red-700 sm:m-10 sm:p-8 sm:text-lg">{error}</div>;
   }
 
   const safeReport = {
@@ -590,22 +689,22 @@ function ReportsPage() {
   };
 
   return (
-    <div className="grid gap-8 p-10 xl:grid-cols-3">
-      <section className="rounded-[2rem] bg-white p-8 shadow-[0_20px_45px_rgba(148,163,184,0.18)]">
-        <h2 className="text-[1.8rem] font-bold text-slate-900">User Breakdown</h2>
-        <p className="mt-4 text-xl text-slate-500">Customers: {safeReport.userBreakdown.customers}</p>
-        <p className="mt-2 text-xl text-slate-500">Admins: {safeReport.userBreakdown.admins}</p>
+    <div className="grid gap-6 p-4 sm:grid-cols-2 sm:p-6 xl:grid-cols-3 lg:p-10">
+      <section className="rounded-[2rem] bg-white p-6 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-8">
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-[1.8rem]">User Breakdown</h2>
+        <p className="mt-4 text-base text-slate-500 sm:text-xl">Customers: {safeReport.userBreakdown.customers}</p>
+        <p className="mt-2 text-base text-slate-500 sm:text-xl">Admins: {safeReport.userBreakdown.admins}</p>
       </section>
-      <section className="rounded-[2rem] bg-white p-8 shadow-[0_20px_45px_rgba(148,163,184,0.18)]">
-        <h2 className="text-[1.8rem] font-bold text-slate-900">Vendor Breakdown</h2>
-        <p className="mt-4 text-xl text-slate-500">Approved: {safeReport.vendorBreakdown.approved}</p>
-        <p className="mt-2 text-xl text-slate-500">Pending: {safeReport.vendorBreakdown.pending}</p>
+      <section className="rounded-[2rem] bg-white p-6 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-8">
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-[1.8rem]">Vendor Breakdown</h2>
+        <p className="mt-4 text-base text-slate-500 sm:text-xl">Approved: {safeReport.vendorBreakdown.approved}</p>
+        <p className="mt-2 text-base text-slate-500 sm:text-xl">Pending: {safeReport.vendorBreakdown.pending}</p>
       </section>
-      <section className="rounded-[2rem] bg-white p-8 shadow-[0_20px_45px_rgba(148,163,184,0.18)]">
-        <h2 className="text-[1.8rem] font-bold text-slate-900">Order Breakdown</h2>
-        <p className="mt-4 text-xl text-slate-500">Total: {safeReport.orderBreakdown.total}</p>
-        <p className="mt-2 text-xl text-slate-500">Delivered: {safeReport.orderBreakdown.delivered}</p>
-        <p className="mt-2 text-xl text-slate-500">Pending: {safeReport.orderBreakdown.pending}</p>
+      <section className="rounded-[2rem] bg-white p-6 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-8">
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-[1.8rem]">Order Breakdown</h2>
+        <p className="mt-4 text-base text-slate-500 sm:text-xl">Total: {safeReport.orderBreakdown.total}</p>
+        <p className="mt-2 text-base text-slate-500 sm:text-xl">Delivered: {safeReport.orderBreakdown.delivered}</p>
+        <p className="mt-2 text-base text-slate-500 sm:text-xl">Pending: {safeReport.orderBreakdown.pending}</p>
       </section>
     </div>
   );
@@ -614,6 +713,7 @@ function ReportsPage() {
 export default function AdminPage() {
   const [adminName, setAdminName] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -625,6 +725,19 @@ export default function AdminPage() {
 
     setAdminName(user.name || "Admin");
   }, [navigate]);
+
+  useEffect(() => {
+    if (!isMobileSidebarOpen) {
+      return undefined;
+    }
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isMobileSidebarOpen]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -642,9 +755,15 @@ export default function AdminPage() {
 
   return (
     <div className="flex min-h-screen bg-[#f7f8fc] text-slate-900">
-      <AdminSidebar adminName={adminName} onLogout={handleLogout} isLoggingOut={isLoggingOut} />
-      <div className="flex min-h-screen flex-1 flex-col">
-        <AdminTopbar />
+      <AdminSidebar
+        adminName={adminName}
+        onLogout={handleLogout}
+        isLoggingOut={isLoggingOut}
+        isMobileOpen={isMobileSidebarOpen}
+        onClose={() => setIsMobileSidebarOpen(false)}
+      />
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <AdminTopbar onOpenMenu={() => setIsMobileSidebarOpen(true)} />
         <main className="flex-1">
           <Routes>
             <Route index element={<Navigate to="dashboard" replace />} />

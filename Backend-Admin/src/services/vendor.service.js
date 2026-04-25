@@ -95,4 +95,16 @@ const getVendorDashboardStats = async () => {
   }
 };
 
-export { approveVendor, deleteVendor, getAllOrders, getAllVendors, getVendorDashboardStats };
+const updateOrderById = async (orderId, payload) => {
+  try {
+    const response = await axios.patch(`${ORDER_BASE_URL}/admin/${orderId}`, payload, {
+      headers: internalHeaders(),
+    });
+
+    return response.data.data;
+  } catch (error) {
+    wrapVendorError(error, "Failed to update order");
+  }
+};
+
+export { approveVendor, deleteVendor, getAllOrders, getAllVendors, getVendorDashboardStats, updateOrderById };

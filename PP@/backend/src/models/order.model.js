@@ -60,6 +60,21 @@ const orderSchema = new Schema(
             type: String,
             enum: ["Cash on Delivery", "Online"],
             default: "Cash on Delivery"
+        },
+        cancellation: {
+            byRole: {
+                type: String,
+                enum: ["User", "Vendor", "Admin"],
+                default: null
+            },
+            reason: {
+                type: String,
+                default: ""
+            },
+            cancelledAt: {
+                type: Date,
+                default: null
+            }
         }
     },
     {
