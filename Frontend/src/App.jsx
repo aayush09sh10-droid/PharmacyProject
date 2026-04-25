@@ -13,6 +13,7 @@ import CartPage from './components/Shop/CartPage.jsx'
 import CustomerOrdersPage from './components/Shop/CustomerOrdersPage.jsx'
 import VendorPortal from './components/VendorPortal.jsx'
 import AIAssistantPage from './components/User/AIAssistant/AIAssistantPage.jsx'
+import CustomerProfilePage from './components/Profile/CustomerProfilePage.jsx'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/ai-assistant" element={<AIAssistantPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/my-orders" element={<CustomerOrdersPage />} />
+        <Route path="/profile" element={<CustomerProfilePage />} />
         <Route path="/signin" element={<LoginOuter mode="login" />} />
         <Route path="/register" element={<LoginOuter mode="register" />} />
         <Route path="/vendor-login" element={<VendorLogin />} />

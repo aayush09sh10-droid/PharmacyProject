@@ -17,14 +17,14 @@ export default function AIMessageBubble({ message }) {
     .filter(Boolean);
 
   return (
-    <div className={`flex gap-4 ${isAssistant ? "items-start" : "justify-end"}`}>
+    <div className={`flex min-w-0 gap-3 sm:gap-4 ${isAssistant ? "items-start" : "justify-end"}`}>
       {isAssistant ? (
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-fuchsia-600 to-violet-500 text-white shadow-lg shadow-fuchsia-200">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-fuchsia-600 to-violet-500 text-white shadow-lg shadow-fuchsia-200 sm:h-11 sm:w-11">
           <Bot size={18} />
         </div>
       ) : null}
 
-      <div className={`max-w-3xl ${isAssistant ? "" : "flex flex-col items-end"}`}>
+      <div className={`min-w-0 max-w-[calc(100%-3rem)] sm:max-w-3xl ${isAssistant ? "" : "flex flex-col items-end"}`}>
         <div
           className={`rounded-[28px] px-5 py-4 shadow-sm ${
             isAssistant
@@ -32,7 +32,7 @@ export default function AIMessageBubble({ message }) {
               : "bg-linear-to-r from-emerald-500 to-teal-500 text-white"
           }`}
         >
-          <div className="space-y-3 text-[15px] leading-7">
+          <div className="space-y-3 break-words text-[15px] leading-7">
             {paragraphs.map((paragraph, index) => (
               <p key={`${message.id}-${index}`}>{paragraph}</p>
             ))}
@@ -44,7 +44,7 @@ export default function AIMessageBubble({ message }) {
       </div>
 
       {!isAssistant ? (
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg shadow-slate-200">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg shadow-slate-200 sm:h-11 sm:w-11">
           <UserRound size={18} />
         </div>
       ) : null}

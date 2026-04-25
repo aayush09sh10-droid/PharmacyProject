@@ -67,6 +67,32 @@ async function fetchCurrentVendor() {
   return handleResponse(response);
 }
 
+async function updateCurrentVendorProfile(payload) {
+  const response = await fetch(`${VENDOR_API_URL}/api/v1/vendors/me`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getVendorAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+}
+
+async function changeVendorPassword(payload) {
+  const response = await fetch(`${VENDOR_API_URL}/api/v1/vendors/change-password`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getVendorAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+}
+
 async function fetchVendorProducts() {
   const response = await fetch(`${VENDOR_API_URL}/api/v1/products`, {
     headers: getVendorAuthHeaders(),
@@ -183,6 +209,7 @@ function logoutVendor() {
 
 export {
   clearVendorSession,
+  changeVendorPassword,
   createVendorProduct,
   deleteVendorProduct,
   fetchCurrentVendor,
@@ -198,6 +225,7 @@ export {
   registerVendor,
   saveStoredVendor,
   saveVendorSession,
+  updateCurrentVendorProfile,
   updateVendorOrderStatus,
   updateVendorProduct,
 };

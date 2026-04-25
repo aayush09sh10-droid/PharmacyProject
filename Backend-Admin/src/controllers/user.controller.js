@@ -179,10 +179,105 @@ const logoutUser=asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200,{},"User logged out"))
 })
 const getProfile = asyncHandler(async (req, res) => {
-    return res.status(200).json({
-        user: req.user
-    })
+    return res.status(200).json(
+        new ApiResponse(200, req.user, "Profile fetched successfully")
+    )
 })
+
+const updateProfile = asyncHandler(async (req, res) => {
+    const updates = {};
+    const normalizedName = req.body?.name?.trim();
+    const normalizedEmail = req.body?.email?.trim().toLowerCase();
+    const normalizedUserName = req.body?.userName?.trim();
+
+    if (normalizedName) {
+        updates.name = normalizedName;
+    }
+
+    if (normalizedEmail) {
+        const existingUser = await User.findOne({
+            email: normalizedEmail,
+            _id: { $ne: req.user._id },
+        });
+
+        if (existingUser) {
+            throw new ApiError(409, "An account with this email already exists");
+        }
+
+        updates.email = normalizedEmail;
+    }
+
+    if (normalizedUserName) {
+        const existingUserName = await User.findOne({
+            userName: normalizedUserName,
+            _id: { $ne: req.user._id },
+        });
+
+        if (existingUserName) {
+            throw new ApiError(409, "This username is already in use");
+        }
+
+        updates.userName = normalizedUserName;
+    }
+
+    if (typeof req.body?.phone === "string") {
+        updates.phone = req.body.phone.trim();
+    }
+
+    if (typeof req.body?.latitude !== "undefined") {
+        updates.latitude = req.body.latitude;
+    }
+
+    if (typeof req.body?.longitude !== "undefined") {
+        updates.longitude = req.body.longitude;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { $set: updates },
+        { new: true, runValidators: true },
+    ).select("-password -refreshToken");
+
+    if (!updatedUser) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedUser, "Profile updated successfully")
+    );
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+    const currentPassword = req.body?.currentPassword?.trim();
+    const newPassword = req.body?.newPassword?.trim();
+
+    if (!currentPassword || !newPassword) {
+        throw new ApiError(400, "Current password and new password are required");
+    }
+
+    if (newPassword.length < 6) {
+        throw new ApiError(400, "New password must be at least 6 characters long");
+    }
+
+    const user = await User.findById(req.user._id).select("+password");
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(currentPassword);
+
+    if (!isPasswordValid) {
+        throw new ApiError(400, "Current password is incorrect");
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, "Password updated successfully")
+    );
+});
 const deleteUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
@@ -378,4 +473,15 @@ const askAiAssistant = asyncHandler(async (req, res) => {
 });
 
 
-export {registerUser,loginUser,logoutUser,getProfile, deleteUser, fetchCustomerOrders, cancelCustomerOrder, askAiAssistant}
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    getProfile,
+    updateProfile,
+    changePassword,
+    deleteUser,
+    fetchCustomerOrders,
+    cancelCustomerOrder,
+    askAiAssistant
+}

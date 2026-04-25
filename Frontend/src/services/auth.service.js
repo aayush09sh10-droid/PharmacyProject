@@ -49,6 +49,10 @@ function normalizeSessionPayload(data) {
   return data;
 }
 
+function saveStoredUser(user) {
+  localStorage.setItem("user", JSON.stringify(user));
+}
+
 async function loginUser(email, password) {
   const response = await fetch(`${API_URL}/api/v1/users/login`, {
     method: "POST",
@@ -89,12 +93,60 @@ async function logoutUser() {
   return handleResponse(response);
 }
 
+async function fetchCurrentUserProfile() {
+  const token = localStorage.getItem("accessToken");
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await fetch(`${API_URL}/api/v1/users/me`, {
+    headers,
+  });
+
+  return handleResponse(response);
+}
+
+async function updateCurrentUserProfile(payload) {
+  const token = localStorage.getItem("accessToken");
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}/api/v1/users/me`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+}
+
+async function changeCurrentUserPassword(payload) {
+  const token = localStorage.getItem("accessToken");
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}/api/v1/users/change-password`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+}
+
 function saveAuthSession(data) {
   const normalized = normalizeSessionPayload(data);
   if (!normalized?.user || !normalized?.accessToken) {
     throw new Error("Invalid login response");
   }
-  localStorage.setItem("user", JSON.stringify(normalized.user));
+  saveStoredUser(normalized.user);
   localStorage.setItem("accessToken", normalized.accessToken);
 }
 
@@ -119,7 +171,9 @@ function clearAuthSession() {
 
 export {
   API_URL,
+  changeCurrentUserPassword,
   clearAuthSession,
+  fetchCurrentUserProfile,
   getStoredUser,
   handleResponse,
   loginUser,
@@ -127,4 +181,6 @@ export {
   normalizeSessionPayload,
   registerUser,
   saveAuthSession,
+  saveStoredUser,
+  updateCurrentUserProfile,
 };

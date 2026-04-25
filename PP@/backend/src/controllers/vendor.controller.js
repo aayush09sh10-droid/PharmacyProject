@@ -120,6 +120,89 @@ const getCurrentVendor = asyncHandler(async (req, res) => {
     );
 });
 
+const updateCurrentVendor = asyncHandler(async (req, res) => {
+    const updates = {};
+    const normalizedEmail = req.body?.email?.trim().toLowerCase();
+    const normalizedOwnerName = req.body?.ownerName?.trim();
+    const normalizedPharmacyName = req.body?.pharmacyName?.trim();
+    const normalizedPhone = typeof req.body?.phone === "string" ? normalizePhone(req.body.phone) : "";
+
+    if (normalizedEmail) {
+        const existingVendor = await Vendor.findOne({
+            email: normalizedEmail,
+            _id: { $ne: req.user._id },
+        });
+
+        if (existingVendor) {
+            throw new ApiError(409, "Vendor with this email already exists");
+        }
+
+        updates.email = normalizedEmail;
+    }
+
+    if (normalizedOwnerName) {
+        updates.ownerName = normalizedOwnerName;
+    }
+
+    if (normalizedPharmacyName) {
+        updates.pharmacyName = normalizedPharmacyName;
+    }
+
+    if (normalizedPhone) {
+        if (!/^\d{10}$/.test(normalizedPhone)) {
+            throw new ApiError(400, "Phone number must be exactly 10 digits");
+        }
+
+        updates.phone = normalizedPhone;
+    }
+
+    const vendor = await Vendor.findByIdAndUpdate(
+        req.user._id,
+        { $set: updates },
+        { new: true, runValidators: true },
+    ).select("-password -refreshToken");
+
+    if (!vendor) {
+        throw new ApiError(404, "Vendor not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, vendor, "Vendor profile updated successfully")
+    );
+});
+
+const changeVendorPassword = asyncHandler(async (req, res) => {
+    const currentPassword = req.body?.currentPassword?.trim();
+    const newPassword = req.body?.newPassword?.trim();
+
+    if (!currentPassword || !newPassword) {
+        throw new ApiError(400, "Current password and new password are required");
+    }
+
+    if (newPassword.length < 6) {
+        throw new ApiError(400, "New password must be at least 6 characters long");
+    }
+
+    const vendor = await Vendor.findById(req.user._id);
+
+    if (!vendor) {
+        throw new ApiError(404, "Vendor not found");
+    }
+
+    const isPasswordValid = await vendor.isPasswordCorrect(currentPassword);
+
+    if (!isPasswordValid) {
+        throw new ApiError(400, "Current password is incorrect");
+    }
+
+    vendor.password = newPassword;
+    await vendor.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, "Vendor password updated successfully")
+    );
+});
+
 const getAllVendors = asyncHandler(async (req, res) => {
     const vendors = await Vendor.find().sort({ createdAt: -1 }).select("-password -refreshToken");
 
@@ -184,6 +267,8 @@ export {
     loginVendor,
     registerVendor,
     getCurrentVendor,
+    updateCurrentVendor,
+    changeVendorPassword,
     getAllVendors,
     approveVendor,
     deleteVendor

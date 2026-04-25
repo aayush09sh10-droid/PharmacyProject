@@ -3,6 +3,8 @@ import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "reac
 import {
   AlertTriangle,
   BarChart3,
+  ChevronLeft,
+  ChevronRight,
   DollarSign,
   LayoutDashboard,
   LogOut,
@@ -10,11 +12,20 @@ import {
   ShieldCheck,
   ShoppingBag,
   Store,
+  UserRound,
   Users,
   X,
 } from "lucide-react";
 import NotificationBell from "./Notifications/NotificationBell.jsx";
-import { clearAuthSession, getStoredUser, logoutUser } from "../services/auth.service.js";
+import {
+  changeCurrentUserPassword,
+  clearAuthSession,
+  fetchCurrentUserProfile,
+  getStoredUser,
+  logoutUser,
+  saveStoredUser,
+  updateCurrentUserProfile,
+} from "../services/auth.service.js";
 import {
   fetchNotifications,
   markAllNotificationsAsRead,
@@ -32,6 +43,7 @@ import {
   fetchVendorsForApproval,
 } from "../services/admin.service.js";
 import PharmaFooter from "./Layout/PharmaFooter.jsx";
+import RoleProfileEditor from "./Profile/RoleProfileEditor.jsx";
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
@@ -41,6 +53,7 @@ const menuItems = [
   { name: "Orders", icon: ShoppingBag, path: "orders" },
   { name: "Payments", icon: DollarSign, path: "payments" },
   { name: "Reports", icon: BarChart3, path: "reports" },
+  { name: "Profile", icon: UserRound, path: "profile" },
 ];
 
 const cardStyles = {
@@ -115,19 +128,36 @@ function getSearchableText(value) {
   return String(value);
 }
 
-function AdminSidebar({ adminName, onLogout, isLoggingOut, isMobileOpen, onClose }) {
+function AdminSidebar({
+  adminName,
+  onLogout,
+  isLoggingOut,
+  isMobileOpen,
+  onClose,
+  isCollapsed,
+  onToggleCollapse,
+}) {
+  const shouldCollapse = isCollapsed && !isMobileOpen;
   const sidebarBody = (
     <>
-      <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
-        <div className="flex items-start justify-between gap-3 lg:block">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.7rem]">Admin Portal</h1>
-            <p className="mt-1 text-sm text-slate-500 sm:text-base">{adminName || "Admin"}</p>
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-violet-300 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-700">
-              <ShieldCheck size={16} />
-              <span>Super Admin</span>
+      <div className="border-b border-slate-200 px-4 py-5 sm:px-5">
+        <div className="flex items-start justify-between gap-3">
+          {shouldCollapse ? (
+            <div className="hidden w-full justify-center lg:flex">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
+                <ShieldCheck size={20} />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.7rem]">Admin Portal</h1>
+              <p className="mt-1 break-words text-sm text-slate-500 sm:text-base">{adminName || "Admin"}</p>
+              <div className="mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-violet-300 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-700">
+                <ShieldCheck size={16} className="shrink-0" />
+                <span className="truncate">Super Admin</span>
+              </div>
+            </div>
+          )}
           <button
             type="button"
             onClick={onClose}
@@ -138,7 +168,7 @@ function AdminSidebar({ adminName, onLogout, isLoggingOut, isMobileOpen, onClose
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -147,31 +177,48 @@ function AdminSidebar({ adminName, onLogout, isLoggingOut, isMobileOpen, onClose
                 key={item.path}
                 to={`/admin-dashboard/${item.path}`}
                 onClick={onClose}
+                title={shouldCollapse ? item.name : undefined}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition sm:px-5 sm:py-4 sm:text-[0.98rem] ${
+                  `flex items-center rounded-2xl py-3 text-sm font-semibold transition sm:py-4 sm:text-[0.98rem] ${
+                    shouldCollapse ? "justify-center px-2" : "gap-3 px-4 sm:px-5"
+                  } ${
                     isActive
                       ? "bg-linear-to-r from-fuchsia-500 to-violet-600 text-white shadow-[0_18px_40px_rgba(124,58,237,0.35)]"
                       : "text-slate-600 hover:bg-slate-50"
                   }`
                 }
               >
-                <Icon size={18} />
-                <span>{item.name}</span>
+                <Icon size={18} className="shrink-0" />
+                {!shouldCollapse ? <span className="truncate">{item.name}</span> : null}
               </NavLink>
             );
           })}
         </div>
       </nav>
 
-      <div className="border-t border-slate-200 px-3 py-4 sm:px-4">
+      <div className="space-y-2 border-t border-slate-200 px-3 py-4">
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          className={`hidden w-full items-center rounded-2xl py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-50 lg:flex ${
+            shouldCollapse ? "justify-center px-2" : "gap-3 px-4 sm:px-5"
+          }`}
+          title={shouldCollapse ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {shouldCollapse ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {!shouldCollapse ? <span>Collapse</span> : null}
+        </button>
         <button
           type="button"
           onClick={onLogout}
           disabled={isLoggingOut}
-          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-70 sm:px-5 sm:py-3.5 sm:text-[0.98rem]"
+          className={`flex w-full items-center rounded-2xl py-3 text-left text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-70 sm:py-3.5 sm:text-[0.98rem] ${
+            shouldCollapse ? "justify-center px-2" : "gap-3 px-4 sm:px-5"
+          }`}
+          title={shouldCollapse ? "Logout" : undefined}
         >
-          <LogOut size={18} />
-          <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+          <LogOut size={18} className="shrink-0" />
+          {!shouldCollapse ? <span>{isLoggingOut ? "Logging out..." : "Logout"}</span> : null}
         </button>
       </div>
     </>
@@ -186,7 +233,9 @@ function AdminSidebar({ adminName, onLogout, isLoggingOut, isMobileOpen, onClose
         onClick={onClose}
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[19rem] max-w-[86vw] flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-200 lg:static lg:z-auto lg:h-screen lg:w-[300px] lg:max-w-none lg:translate-x-0 lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[19rem] max-w-[86vw] flex-col border-r border-slate-200 bg-white shadow-2xl transition-all duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:max-w-none lg:translate-x-0 lg:shadow-none ${
+          isCollapsed ? "lg:w-[76px]" : "lg:w-[300px]"
+        } ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -937,10 +986,152 @@ function ReportsPage() {
   );
 }
 
+function AdminProfilePage({ onProfileUpdated }) {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [profileForm, setProfileForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    userName: "",
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [profileMessage, setProfileMessage] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const data = await fetchCurrentUserProfile();
+        setProfile(data);
+        setProfileForm({
+          name: data.name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          userName: data.userName || "",
+        });
+      } catch (requestError) {
+        setError(requestError.message || "Failed to load admin profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  const handleProfileFieldChange = (key, value) => {
+    setProfileForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const handlePasswordFieldChange = (key, value) => {
+    setPasswordForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleSaveProfile = async (event) => {
+    event.preventDefault();
+    setError("");
+    setProfileMessage("");
+    setPasswordMessage("");
+    setSavingProfile(true);
+
+    try {
+      const updated = await updateCurrentUserProfile(profileForm);
+      setProfile(updated);
+      saveStoredUser(updated);
+      onProfileUpdated(updated);
+      setProfileMessage("Admin profile updated successfully.");
+      window.dispatchEvent(new Event("storage"));
+    } catch (requestError) {
+      setError(requestError.message || "Failed to update admin profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async (event) => {
+    event.preventDefault();
+    setError("");
+    setPasswordMessage("");
+    setProfileMessage("");
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setError("New password and confirm password do not match.");
+      return;
+    }
+
+    setSavingPassword(true);
+
+    try {
+      await changeCurrentUserPassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setPasswordMessage("Password updated successfully.");
+    } catch (requestError) {
+      setError(requestError.message || "Failed to update password");
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="p-6 text-base text-slate-500 sm:p-10 sm:text-xl">Loading profile...</div>;
+  }
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-10">
+      <RoleProfileEditor
+        title="Admin Profile"
+        subtitle="Manage your admin account information and keep your credentials current."
+        badgeLabel="Admin Account"
+        badgeTone="violet"
+        profile={profile}
+        profileFields={[
+          { key: "name", label: "Full Name" },
+          { key: "email", label: "Email Address", type: "email" },
+          { key: "phone", label: "Phone Number" },
+          { key: "userName", label: "Username" },
+        ]}
+        profileForm={profileForm}
+        onProfileFieldChange={handleProfileFieldChange}
+        onSaveProfile={handleSaveProfile}
+        savingProfile={savingProfile}
+        passwordForm={passwordForm}
+        onPasswordFieldChange={handlePasswordFieldChange}
+        onChangePassword={handleChangePassword}
+        savingPassword={savingPassword}
+        profileMessage={profileMessage}
+        passwordMessage={passwordMessage}
+        error={error}
+        detailItems={[
+          { label: "Admin Name", value: profile?.name },
+          { label: "Email", value: profile?.email },
+          { label: "Phone", value: profile?.phone },
+          { label: "Joined", value: profile?.createdAt ? formatDate(profile.createdAt) : "" },
+        ]}
+      />
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [adminName, setAdminName] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -980,6 +1171,10 @@ export default function AdminPage() {
     }
   };
 
+  const handleAdminProfileUpdated = (updatedUser) => {
+    setAdminName(updatedUser?.name || "Admin");
+  };
+
   return (
     <div className="flex min-h-screen bg-[#f7f8fc] text-slate-900">
       <AdminSidebar
@@ -988,6 +1183,8 @@ export default function AdminPage() {
         isLoggingOut={isLoggingOut}
         isMobileOpen={isMobileSidebarOpen}
         onClose={() => setIsMobileSidebarOpen(false)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed((current) => !current)}
       />
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <AdminTopbar onOpenMenu={() => setIsMobileSidebarOpen(true)} />
@@ -1001,6 +1198,7 @@ export default function AdminPage() {
             <Route path="orders" element={<OrdersPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="profile" element={<AdminProfilePage onProfileUpdated={handleAdminProfileUpdated} />} />
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </main>

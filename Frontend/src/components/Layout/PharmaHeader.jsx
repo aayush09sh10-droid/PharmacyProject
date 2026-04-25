@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bot,
@@ -51,6 +51,8 @@ export default function PharmaHeader({
   const [notifications, setNotifications] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
 
   useEffect(() => {
     setCurrentUser(getStoredUser());
@@ -90,16 +92,6 @@ export default function PharmaHeader({
       active: activePage === "about",
       onClick: () => navigate("/about"),
     },
-    ...(customerUser
-      ? [
-          {
-            icon: ShoppingCart,
-            label: "My Orders",
-            active: activePage === "orders",
-            onClick: () => navigate("/my-orders"),
-          },
-        ]
-      : []),
     {
       icon: CircleHelp,
       label: "Support",
@@ -127,6 +119,34 @@ export default function PharmaHeader({
     };
   }, [isMobileMenuOpen]);
 
+  useEffect(() => {
+    if (!profileMenuOpen) {
+      return undefined;
+    }
+
+    const handlePointerDown = (event) => {
+      if (!profileMenuRef.current?.contains(event.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [profileMenuOpen]);
+
   const handleNavigate = (callback) => {
     callback();
     setIsMobileMenuOpen(false);
@@ -140,6 +160,7 @@ export default function PharmaHeader({
     } finally {
       clearAuthSession();
       setCurrentUser(null);
+      setProfileMenuOpen(false);
       setIsMobileMenuOpen(false);
       navigate("/", { replace: true });
     }
@@ -217,7 +238,7 @@ export default function PharmaHeader({
         <button
           type="button"
           onClick={() => navigate("/cart")}
-          className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition sm:hidden ${
+          className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition md:hidden ${
             activePage === "cart"
               ? "border-amber-300 bg-amber-50 text-amber-700"
               : "border-amber-300 bg-white text-amber-700 hover:bg-amber-50"
@@ -232,9 +253,9 @@ export default function PharmaHeader({
           <ShoppingCart size={18} />
         </button>
 
-        <div className="hidden items-center gap-3 sm:flex">
+        <div className="hidden min-w-0 items-center gap-3 md:flex">
           {customerUser ? (
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <NotificationBell
                 notifications={notifications}
                 isOpen={notificationsOpen}
@@ -258,20 +279,58 @@ export default function PharmaHeader({
                   setNotifications((current) => current.map((item) => ({ ...item, isRead: true })));
                 }}
               />
-              <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700 shadow-sm">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
-                  {(customerUser.name || "C").charAt(0).toUpperCase()}
-                </div>
-                <span>{customerUser.name || "Customer"}</span>
-                <ChevronDown size={16} />
+              <div ref={profileMenuRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setProfileMenuOpen((current) => !current)}
+                  className="inline-flex min-w-0 max-w-[220px] items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700 shadow-sm"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
+                    {(customerUser.name || "C").charAt(0).toUpperCase()}
+                  </div>
+                  <span className="truncate">{customerUser.name || "Customer"}</span>
+                  <ChevronDown size={16} className={`shrink-0 transition ${profileMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {profileMenuOpen ? (
+                  <div className="absolute right-0 z-40 mt-3 w-[19rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.16)]">
+                    <div className="border-b border-slate-200 px-4 py-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Signed in as</p>
+                      <p className="mt-2 break-words text-sm font-semibold text-slate-900">{customerUser.name || "Customer"}</p>
+                      <p className="mt-1 break-all text-sm text-slate-500">{currentUser?.email || "No email available"}</p>
+                    </div>
+                    <div className="space-y-2 p-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          navigate("/profile");
+                        }}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      >
+                        Profile
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          navigate("/my-orders");
+                        }}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      >
+                        My Orders
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCustomerLogout}
+                        className="w-full rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-100"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
-              <button
-                type="button"
-                onClick={handleCustomerLogout}
-                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              >
-                Logout
-              </button>
             </div>
           ) : (
             <>
@@ -383,13 +442,27 @@ export default function PharmaHeader({
                 panelClassName="left-0 right-auto mt-2 w-full max-w-full"
                 buttonClassName="relative inline-flex w-full items-center justify-center rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
               />
-              <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm">
+              <div className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
                   {(customerUser.name || "C").charAt(0).toUpperCase()}
                 </div>
-                <span>{customerUser.name || "Customer"}</span>
-                <ChevronDown size={16} />
+                <span className="truncate">{customerUser.name || "Customer"}</span>
+                <ChevronDown size={16} className="shrink-0" />
               </div>
+              <button
+                type="button"
+                onClick={() => handleNavigate(() => navigate("/profile"))}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Profile
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavigate(() => navigate("/my-orders"))}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                My Orders
+              </button>
               <button
                 type="button"
                 onClick={handleCustomerLogout}

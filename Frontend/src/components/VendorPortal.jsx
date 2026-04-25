@@ -22,9 +22,11 @@ import {
   Store,
   Trash2,
   Truck,
+  UserRound,
   X,
 } from "lucide-react";
 import {
+  changeVendorPassword,
   createVendorProduct,
   deleteVendorProduct,
   fetchCurrentVendor,
@@ -37,17 +39,20 @@ import {
   markAllVendorNotificationsAsRead,
   markVendorNotificationAsRead,
   saveStoredVendor,
+  updateCurrentVendorProfile,
   updateVendorOrderStatus,
   updateVendorProduct,
 } from "../services/vendor.service.js";
 import NotificationBell from "./Notifications/NotificationBell.jsx";
 import PharmaFooter from "./Layout/PharmaFooter.jsx";
+import RoleProfileEditor from "./Profile/RoleProfileEditor.jsx";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
   { name: "Products", icon: Package, path: "products" },
   { name: "Inventory", icon: Boxes, path: "inventory" },
   { name: "Orders", icon: ClipboardList, path: "orders" },
+  { name: "Profile", icon: UserRound, path: "profile" },
 ];
 
 const vendorShell = {
@@ -889,6 +894,130 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
   );
 }
 
+function VendorProfilePage({ vendor, onVendorUpdated }) {
+  const [profileForm, setProfileForm] = useState({
+    ownerName: vendor?.ownerName || "",
+    pharmacyName: vendor?.pharmacyName || "",
+    email: vendor?.email || "",
+    phone: vendor?.phone || "",
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [profileMessage, setProfileMessage] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+
+  useEffect(() => {
+    setProfileForm({
+      ownerName: vendor?.ownerName || "",
+      pharmacyName: vendor?.pharmacyName || "",
+      email: vendor?.email || "",
+      phone: vendor?.phone || "",
+    });
+  }, [vendor?.ownerName, vendor?.pharmacyName, vendor?.email, vendor?.phone]);
+
+  const handleProfileFieldChange = (key, value) => {
+    setProfileForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const handlePasswordFieldChange = (key, value) => {
+    setPasswordForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleSaveProfile = async (event) => {
+    event.preventDefault();
+    setError("");
+    setProfileMessage("");
+    setPasswordMessage("");
+    setSavingProfile(true);
+
+    try {
+      const updatedVendor = await updateCurrentVendorProfile(profileForm);
+      saveStoredVendor(updatedVendor);
+      onVendorUpdated({
+        ...updatedVendor,
+        role: "Vendor",
+        name: updatedVendor.ownerName || updatedVendor.pharmacyName,
+      });
+      setProfileMessage("Vendor profile updated successfully.");
+      window.dispatchEvent(new Event("storage"));
+    } catch (requestError) {
+      setError(requestError.message || "Failed to update vendor profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async (event) => {
+    event.preventDefault();
+    setError("");
+    setProfileMessage("");
+    setPasswordMessage("");
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setError("New password and confirm password do not match.");
+      return;
+    }
+
+    setSavingPassword(true);
+
+    try {
+      await changeVendorPassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setPasswordMessage("Password updated successfully.");
+    } catch (requestError) {
+      setError(requestError.message || "Failed to update password");
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  return (
+    <RoleProfileEditor
+      title="Vendor Profile"
+      subtitle="Keep your pharmacy information accurate so customers and admins always see the latest details."
+      badgeLabel={vendor?.status === "approved" ? "Approved Vendor" : "Pending Vendor"}
+      badgeTone="emerald"
+      profile={vendor}
+      profileFields={[
+        { key: "ownerName", label: "Owner Name" },
+        { key: "pharmacyName", label: "Pharmacy Name" },
+        { key: "email", label: "Email Address", type: "email" },
+        { key: "phone", label: "Phone Number" },
+      ]}
+      profileForm={profileForm}
+      onProfileFieldChange={handleProfileFieldChange}
+      onSaveProfile={handleSaveProfile}
+      savingProfile={savingProfile}
+      passwordForm={passwordForm}
+      onPasswordFieldChange={handlePasswordFieldChange}
+      onChangePassword={handleChangePassword}
+      savingPassword={savingPassword}
+      profileMessage={profileMessage}
+      passwordMessage={passwordMessage}
+      error={error}
+      detailItems={[
+        { label: "Pharmacy", value: vendor?.pharmacyName },
+        { label: "Owner", value: vendor?.ownerName },
+        { label: "Status", value: vendor?.status },
+        { label: "Phone", value: vendor?.phone },
+      ]}
+    />
+  );
+}
+
 function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar, onLogout }) {
   return (
     <aside
@@ -925,7 +1054,7 @@ function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar,
 
       <nav className="flex-1 space-y-2 overflow-y-auto px-2 py-4 sm:px-3">
         {navItems.map((item) => {
-          const disabled = !canManageInventory && item.path !== "dashboard";
+          const disabled = !canManageInventory && !["dashboard", "profile"].includes(item.path);
 
           if (disabled) {
             return (
@@ -1218,6 +1347,10 @@ export default function VendorPortal() {
                     onOrdersUpdated={loadStats}
                   />
                 }
+              />
+              <Route
+                path="profile"
+                element={<VendorProfilePage vendor={vendor} onVendorUpdated={setVendor} />}
               />
               <Route path="*" element={<Navigate to="dashboard" replace />} />
             </Routes>
