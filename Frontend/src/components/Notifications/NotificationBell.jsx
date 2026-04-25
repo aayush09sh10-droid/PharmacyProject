@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
 
 function formatRelativeTime(value) {
@@ -22,14 +23,44 @@ export default function NotificationBell({
   onToggle,
   onMarkRead,
   onMarkAllRead,
+  onClose,
   className = "",
   panelClassName = "",
   buttonClassName = "",
 }) {
+  const containerRef = useRef(null);
   const unreadCount = notifications.filter((item) => !item.isRead).length;
 
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    const handlePointerDown = (event) => {
+      if (!containerRef.current?.contains(event.target)) {
+        onClose?.();
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, onClose]);
+
   return (
-    <div className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative ${className}`}>
       <button
         type="button"
         onClick={onToggle}

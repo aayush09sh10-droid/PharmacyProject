@@ -1119,6 +1119,7 @@ export default function VendorPortal() {
               notifications={notifications}
               isOpen={notificationsOpen}
               loading={notificationsLoading}
+              onClose={() => setNotificationsOpen(false)}
               onToggle={() => {
                 const nextValue = !notificationsOpen;
                 setNotificationsOpen(nextValue);

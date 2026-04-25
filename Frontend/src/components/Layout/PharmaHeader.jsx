@@ -239,6 +239,7 @@ export default function PharmaHeader({
                 notifications={notifications}
                 isOpen={notificationsOpen}
                 loading={notificationsLoading}
+                onClose={() => setNotificationsOpen(false)}
                 onToggle={() => {
                   const nextValue = !notificationsOpen;
                   setNotificationsOpen(nextValue);
@@ -360,6 +361,7 @@ export default function PharmaHeader({
                 notifications={notifications}
                 isOpen={notificationsOpen}
                 loading={notificationsLoading}
+                onClose={() => setNotificationsOpen(false)}
                 onToggle={() => {
                   const nextValue = !notificationsOpen;
                   setNotificationsOpen(nextValue);

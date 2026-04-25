@@ -232,6 +232,7 @@ function AdminTopbar({ onOpenMenu }) {
         notifications={notifications}
         isOpen={notificationsOpen}
         loading={notificationsLoading}
+        onClose={() => setNotificationsOpen(false)}
         onToggle={() => {
           const nextValue = !notificationsOpen;
           setNotificationsOpen(nextValue);
