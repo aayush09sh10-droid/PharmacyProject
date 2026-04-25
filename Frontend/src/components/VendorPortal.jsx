@@ -41,6 +41,7 @@ import {
   updateVendorProduct,
 } from "../services/vendor.service.js";
 import NotificationBell from "./Notifications/NotificationBell.jsx";
+import PharmaFooter from "./Layout/PharmaFooter.jsx";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
@@ -1181,44 +1182,47 @@ export default function VendorPortal() {
             </div>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6">
-          <Routes>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route
-              path="dashboard"
-              element={
-                canManageInventory ? (
-                  <VendorDashboardPage stats={stats} loading={statsLoading} />
-                ) : (
-                  <PendingApprovalPanel vendor={vendor} />
-                )
-              }
-            />
-            <Route
-              path="products"
-              element={<VendorCatalogPage title="Products" canManageInventory={canManageInventory} />}
-            />
-            <Route
-              path="inventory"
-              element={
-                <VendorCatalogPage
-                  title="Inventory"
-                  canManageInventory={canManageInventory}
-                  inventoryMode
-                />
-              }
-            />
-            <Route
-              path="orders"
-              element={
-                <VendorOrdersPage
-                  canManageInventory={canManageInventory}
-                  onOrdersUpdated={loadStats}
-                />
-              }
-            />
-            <Route path="*" element={<Navigate to="dashboard" replace />} />
-          </Routes>
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-3 sm:p-5 lg:p-6">
+            <Routes>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route
+                path="dashboard"
+                element={
+                  canManageInventory ? (
+                    <VendorDashboardPage stats={stats} loading={statsLoading} />
+                  ) : (
+                    <PendingApprovalPanel vendor={vendor} />
+                  )
+                }
+              />
+              <Route
+                path="products"
+                element={<VendorCatalogPage title="Products" canManageInventory={canManageInventory} />}
+              />
+              <Route
+                path="inventory"
+                element={
+                  <VendorCatalogPage
+                    title="Inventory"
+                    canManageInventory={canManageInventory}
+                    inventoryMode
+                  />
+                }
+              />
+              <Route
+                path="orders"
+                element={
+                  <VendorOrdersPage
+                    canManageInventory={canManageInventory}
+                    onOrdersUpdated={loadStats}
+                  />
+                }
+              />
+              <Route path="*" element={<Navigate to="dashboard" replace />} />
+            </Routes>
+          </div>
+          <PharmaFooter />
         </div>
       </main>
     </div>

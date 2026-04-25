@@ -31,6 +31,7 @@ import {
   fetchAdminUsers,
   fetchVendorsForApproval,
 } from "../services/admin.service.js";
+import PharmaFooter from "./Layout/PharmaFooter.jsx";
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
@@ -67,6 +68,18 @@ function formatMetricValue(card) {
   }
 
   return Number(card.value || 0).toLocaleString();
+}
+
+function formatDate(value) {
+  if (!value) {
+    return "Not available";
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
 }
 
 function getOrderStatusTone(status) {
@@ -637,7 +650,7 @@ function UsersPage() {
   return (
     <DataTablePage
       title="Users"
-      subtitle="All registered admins and customers."
+      subtitle={`All registered admins and customers. Total: ${rows.length}`}
       loading={loading}
       rows={rows}
       emptyText="No users found."
@@ -645,9 +658,14 @@ function UsersPage() {
         { key: "name", label: "Name", width: "1.25fr" },
         { key: "email", label: "Email", width: "1.4fr" },
         { key: "role", label: "Role", width: "0.7fr" },
-        { key: "userName", label: "User Name", width: "1fr" },
+        {
+          key: "createdAt",
+          label: "Joined",
+          width: "0.9fr",
+          render: (row) => formatDate(row.createdAt),
+        },
       ]}
-      searchPlaceholder="Search users by name, email, role, or username"
+      searchPlaceholder="Search users by name, email, or role"
       actionRenderer={(row) => (
         <button
           type="button"
@@ -986,6 +1004,7 @@ export default function AdminPage() {
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </main>
+        <PharmaFooter />
       </div>
     </div>
   );
