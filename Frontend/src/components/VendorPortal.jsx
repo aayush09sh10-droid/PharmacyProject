@@ -607,6 +607,8 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingOrderId, setUpdatingOrderId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [view, setView] = useState("all");
 
   const loadOrders = async () => {
     try {
@@ -665,6 +667,44 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
     return [];
   };
 
+  const filteredOrders = orders.filter((order) => {
+    const matchesView =
+      view === "cancelled"
+        ? order.status === "Cancelled"
+        : view === "active"
+          ? order.status !== "Cancelled"
+          : true;
+
+    if (!matchesView) {
+      return false;
+    }
+
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    const searchableText = [
+      order.id,
+      order.status,
+      order.customer,
+      order.date,
+      order.address,
+      order.items,
+      order.total,
+      order.paymentMethod,
+      order.cancellation?.byRole,
+      order.cancellation?.reason,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return searchableText.includes(query);
+  });
+
+  const hasActiveSearch = searchQuery.trim().length > 0;
+
   const handleStatusUpdate = async (orderId, payload) => {
     setUpdatingOrderId(orderId);
     try {
@@ -685,13 +725,62 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
         <p className="mt-1 text-xs text-slate-600 sm:text-sm">Manage your pharmacy operations</p>
       </div>
 
+      <div className="mb-5 space-y-3">
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setView("all")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+              view === "all" ? "bg-emerald-600 text-white" : "border border-emerald-200 bg-white text-slate-600 hover:bg-emerald-50"
+            }`}
+          >
+            All Orders
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("active")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+              view === "active" ? "bg-blue-600 text-white" : "border border-emerald-200 bg-white text-slate-600 hover:bg-emerald-50"
+            }`}
+          >
+            Active Orders
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("cancelled")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+              view === "cancelled" ? "bg-rose-600 text-white" : "border border-emerald-200 bg-white text-slate-600 hover:bg-emerald-50"
+            }`}
+          >
+            Cancelled Orders
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search orders by ID, customer, status, payment, or cancellation reason"
+            className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 sm:max-w-xl"
+          />
+          {hasActiveSearch ? (
+            <div className="rounded-2xl bg-white/80 px-4 py-3 text-sm font-medium text-slate-600 shadow-sm">
+              {filteredOrders.length} result{filteredOrders.length === 1 ? "" : "s"}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
       <div className="space-y-3">
         {loading ? (
           <div className="py-10 text-center text-sm text-gray-500">Loading orders...</div>
-        ) : orders.length === 0 ? (
-          <div className="py-10 text-center text-sm text-gray-500">No orders found.</div>
+        ) : filteredOrders.length === 0 ? (
+          <div className="py-10 text-center text-sm text-gray-500">
+            {view === "cancelled" ? "No cancelled orders found." : "No orders found."}
+          </div>
         ) : (
-          orders.map((order, index) => {
+          filteredOrders.map((order, index) => {
             const actions = getActions(order.status);
             return (
               <div key={index} className={`rounded-[1.7rem] p-4 sm:p-5 ${vendorShell.card}`}>

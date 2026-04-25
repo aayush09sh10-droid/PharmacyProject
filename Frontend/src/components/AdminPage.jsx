@@ -344,6 +344,7 @@ function DataTablePage({
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const hasActiveSearch = searchQuery.trim().length > 0;
 
   const filteredRows = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -384,9 +385,11 @@ function DataTablePage({
                 placeholder={searchPlaceholder || `Search ${title.toLowerCase()}...`}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-violet-300 focus:bg-white focus:ring-2 focus:ring-violet-200 sm:max-w-md"
               />
-              <div className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-600">
-                {filteredRows.length} result{filteredRows.length === 1 ? "" : "s"}
-              </div>
+              {hasActiveSearch ? (
+                <div className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-600">
+                  {filteredRows.length} result{filteredRows.length === 1 ? "" : "s"}
+                </div>
+              ) : null}
             </div>
             {renderToolbar ? <div className="flex flex-wrap gap-2">{renderToolbar()}</div> : null}
           </div>

@@ -41,6 +41,7 @@ export default function CustomerOrdersPage() {
   const [cartCount, setCartCount] = useState(() => getCartCount());
   const [cancellingOrderId, setCancellingOrderId] = useState("");
   const [view, setView] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadOrders = async () => {
     try {
@@ -97,16 +98,41 @@ export default function CustomerOrdersPage() {
   };
 
   const filteredOrders = orders.filter((order) => {
-    if (view === "cancelled") {
-      return order.status === "Cancelled";
+    const matchesView =
+      view === "cancelled"
+        ? order.status === "Cancelled"
+        : view === "active"
+          ? order.status !== "Cancelled"
+          : true;
+
+    if (!matchesView) {
+      return false;
     }
 
-    if (view === "active") {
-      return order.status !== "Cancelled";
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return true;
     }
 
-    return true;
+    const searchableText = [
+      order.orderId,
+      order.status,
+      order.customerName,
+      order.customerEmail,
+      order.paymentMethod,
+      order.paymentStatus,
+      order.cancellation?.byRole,
+      order.cancellation?.reason,
+      ...(order.items || []).flatMap((item) => [item.productId, item.quantity, item.price]),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return searchableText.includes(query);
   });
+
+  const hasActiveSearch = searchQuery.trim().length > 0;
 
   return (
     <div className="min-h-screen bg-[#f5fcfb] text-slate-900">
@@ -128,34 +154,51 @@ export default function CustomerOrdersPage() {
         </section>
 
         {!loading && orders.length > 0 ? (
-          <section className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => setView("all")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                view === "all" ? "bg-emerald-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              All Orders
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("active")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                view === "active" ? "bg-blue-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              Active Orders
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("cancelled")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                view === "cancelled" ? "bg-rose-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              Cancelled Orders
-            </button>
+          <section className="mt-6 space-y-3">
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setView("all")}
+                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                  view === "all" ? "bg-emerald-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                All Orders
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("active")}
+                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                  view === "active" ? "bg-blue-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                Active Orders
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("cancelled")}
+                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                  view === "cancelled" ? "bg-rose-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                Cancelled Orders
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search orders by ID, status, payment method, or cancellation reason"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100 sm:max-w-xl"
+              />
+              {hasActiveSearch ? (
+                <div className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-600">
+                  {filteredOrders.length} result{filteredOrders.length === 1 ? "" : "s"}
+                </div>
+              ) : null}
+            </div>
           </section>
         ) : null}
 
