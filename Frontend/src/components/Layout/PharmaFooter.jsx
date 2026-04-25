@@ -51,7 +51,7 @@ export default function PharmaFooter() {
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/30">
                 <HeartPulse size={20} />
               </div>
-              <h2 className="text-xl font-semibold">PharmaCare</h2>
+              <h2 className="break-words text-xl font-semibold">PharmaCare</h2>
             </div>
 
             <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300">
@@ -80,7 +80,7 @@ export default function PharmaFooter() {
                   key={item.label}
                   type="button"
                   onClick={item.path ? () => navigate(item.path) : undefined}
-                  className="w-fit text-left transition hover:text-white"
+                  className="w-fit break-words text-left transition hover:text-white"
                 >
                   {item.label}
                 </button>
@@ -92,7 +92,7 @@ export default function PharmaFooter() {
             <h3 className="text-base font-semibold">Services</h3>
             <div className="mt-4 flex flex-col gap-2.5 text-sm text-slate-300">
               {services.map((service) => (
-                <p key={service}>{service}</p>
+                <p key={service} className="break-words">{service}</p>
               ))}
             </div>
           </div>
@@ -110,11 +110,11 @@ export default function PharmaFooter() {
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={16} className="shrink-0" />
-                <p>+1 (555) 123-4567</p>
+                <p className="break-all">+1 (555) 123-4567</p>
               </div>
               <div className="flex items-center gap-3">
                 <Mail size={16} className="shrink-0" />
-                <p>support@pharmacare.com</p>
+                <p className="break-all">support@pharmacare.com</p>
               </div>
             </div>
           </div>

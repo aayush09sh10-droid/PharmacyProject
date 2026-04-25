@@ -274,7 +274,7 @@ function VendorDashboardPage({ stats, loading }) {
 function ProductModal({ title, product, setProduct, onClose, onSubmit, submitLabel, isSubmitting }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className={`w-full max-w-lg rounded-[1.9rem] ${vendorShell.card}`}>
+      <div className={`max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[1.9rem] ${vendorShell.card}`}>
         <div className="flex items-center justify-between rounded-t-[1.9rem] border-b border-emerald-100 bg-emerald-50/70 p-4 sm:p-5">
           <h2 className="pr-3 text-base font-bold text-emerald-950 sm:text-lg">{title}</h2>
           <button
@@ -355,7 +355,7 @@ function ProductModal({ title, product, setProduct, onClose, onSubmit, submitLab
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl bg-emerald-50/70 p-3">
+          <div className="flex items-start gap-3 rounded-xl bg-emerald-50/70 p-3">
             <input
               disabled={isSubmitting}
               type="checkbox"
@@ -369,7 +369,7 @@ function ProductModal({ title, product, setProduct, onClose, onSubmit, submitLab
             </label>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <button
               type="button"
               onClick={onClose}
@@ -793,7 +793,7 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-bold text-emerald-950 sm:text-lg">{order.id}</h3>
+                      <h3 className="break-all text-base font-bold text-emerald-950 sm:text-lg">{order.id}</h3>
                       <div className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${getStatusColor(order.status)}`}>
                         {order.status === "Pending" && <Package size={11} />}
                         {(order.status === "Delivered" || order.status === "Processing") && <Check size={11} />}
@@ -831,15 +831,15 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
                     ) : null}
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 border-t border-emerald-100 pt-4 lg:ml-5 lg:min-w-[120px] lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-                    <p className="text-lg font-bold text-emerald-950 sm:text-xl">Rs {Number(order.total).toFixed(2)}</p>
-                    <div className="flex flex-wrap items-center justify-end gap-2 lg:max-w-[180px]">
+                  <div className="flex flex-col gap-4 border-t border-emerald-100 pt-4 sm:flex-row sm:items-center sm:justify-between lg:ml-5 lg:min-w-[120px] lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                    <p className="break-words text-lg font-bold text-emerald-950 sm:text-xl">Rs {Number(order.total).toFixed(2)}</p>
+                    <div className="flex flex-wrap items-center gap-2 sm:justify-end lg:max-w-[180px]">
                       {actions.includes("accept") && (
                         <button
                           type="button"
                           disabled={updatingOrderId === order.rawId}
                           onClick={() => handleStatusUpdate(order.rawId, { status: "Processing" })}
-                          className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-100 disabled:opacity-60"
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-100 disabled:opacity-60 sm:w-auto"
                         >
                           <Check size={16} />
                           <span>{updatingOrderId === order.rawId ? "Updating..." : "Accept"}</span>
@@ -859,7 +859,7 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
                               },
                             })
                           }
-                          className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-60 sm:w-auto"
                         >
                           <X size={16} />
                           <span>Reject</span>
@@ -870,7 +870,7 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
                           type="button"
                           disabled={updatingOrderId === order.rawId}
                           onClick={() => handleStatusUpdate(order.rawId, { status: "Shipped" })}
-                          className="inline-flex items-center gap-2 rounded-full bg-purple-50 px-4 py-2 text-sm font-semibold text-purple-600 transition hover:bg-purple-100 disabled:opacity-60"
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-purple-50 px-4 py-2 text-sm font-semibold text-purple-600 transition hover:bg-purple-100 disabled:opacity-60 sm:w-auto"
                         >
                           <Truck size={16} />
                           <span>{updatingOrderId === order.rawId ? "Updating..." : "Ship"}</span>

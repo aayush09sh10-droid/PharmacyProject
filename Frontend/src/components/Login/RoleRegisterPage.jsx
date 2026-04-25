@@ -70,7 +70,7 @@ export default function RoleRegisterPage({
 
   return (
     <div className={`min-h-screen bg-linear-to-b ${accentClass}`}>
-      <div className="py-10">
+      <div className="px-4 py-8 sm:py-10">
         <FormContainer>
           <div className="mb-4">
             <BackButton label="Back" onClick={() => navigate(-1)} />
@@ -126,10 +126,10 @@ export default function RoleRegisterPage({
             <SubmitButton text={loading ? "Registering..." : submitLabel} />
           </form>
 
-          {error && <p className="mt-3 text-center text-sm text-red-600">{error}</p>}
-          {success && <p className="mt-3 text-center text-sm text-green-600">{success}</p>}
+          {error && <p className="mt-3 break-words text-center text-sm text-red-600">{error}</p>}
+          {success && <p className="mt-3 break-words text-center text-sm text-green-600">{success}</p>}
 
-          <p className="mt-4 text-center text-gray-600">
+          <p className="mt-4 text-center text-sm text-gray-600 sm:text-base">
             Already have an account?{" "}
             <span
               className="cursor-pointer font-medium text-green-600 hover:underline"

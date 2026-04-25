@@ -15,8 +15,8 @@ const LoginOuter = ({ mode = "login" }) => {
 
   return (
     <div className="min-h-screen bg-[#F7FAFB]">
-      <div className="LoginOuter px-4 pb-16 pt-10 text-center">
-        <div className="w-full max-w-6xl px-4 text-left">
+      <div className="LoginOuter px-4 pb-16 pt-8 text-center sm:pt-10">
+        <div className="w-full max-w-6xl px-1 text-left sm:px-4">
           <BackButton
             label="Back"
             onClick={() => navigate(isRegisterMode ? "/" : "/")}
@@ -25,15 +25,15 @@ const LoginOuter = ({ mode = "login" }) => {
         <div className="Logo mt-6">
           <img className="Logo_Img" src={Users} alt="PharmaCare Logo" />
         </div>
-        <div className="Page_Header">
-          <h1 className="header text-5xl font-bold">Welcome to PharmaCare</h1>
-          <p className="mt-3 text-lg text-gray-600">
+        <div className="Page_Header mx-auto max-w-3xl px-2">
+          <h1 className="header text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">Welcome to PharmaCare</h1>
+          <p className="mt-3 text-base text-gray-600 sm:text-lg">
             {isRegisterMode
               ? "Choose which role you want to register with"
               : "Choose your role to get started with our healthcare platform"}
           </p>
         </div>
-        <div className="mt-12 grid grid-cols-1 gap-8 px-8 md:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-6 px-0 sm:px-2 lg:mt-12 lg:gap-8 lg:px-8 md:grid-cols-2 xl:grid-cols-3">
           <RoleCard
             image={Customer}
             title="I am a Customer"

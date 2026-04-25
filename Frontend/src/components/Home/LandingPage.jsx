@@ -18,28 +18,28 @@ function ProductRow({ product, onAddToCart }) {
         isInStock ? "border-slate-200 hover:border-emerald-300" : "border-slate-200 opacity-90"
       }`}
     >
-      <div className="flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
           <ShoppingCart size={22} />
         </div>
-        <div>
-          <h4 className="text-[1.15rem] font-semibold text-slate-900">{product.name}</h4>
+        <div className="min-w-0">
+          <h4 className="break-words text-lg font-semibold text-slate-900">{product.name}</h4>
           <p className={`mt-1 text-sm font-medium ${isInStock ? "text-emerald-600" : "text-rose-500"}`}>
             {isInStock ? "In Stock" : "Out of Stock"}
           </p>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 break-words text-sm text-slate-400">
             {product.category} {product.rxRequired ? "• Prescription required" : ""}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4 sm:justify-end">
-        <p className="text-2xl font-bold text-slate-950">{formatCurrency(product.price)}</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+        <p className="break-words text-xl font-bold text-slate-950 sm:text-2xl">{formatCurrency(product.price)}</p>
         {isInStock ? (
           <button
             type="button"
             onClick={() => onAddToCart(product)}
-            className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-emerald-100 transition hover:bg-emerald-600"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-100 transition hover:bg-emerald-600 sm:w-auto sm:text-base"
           >
             <ShoppingCart size={18} />
             <span>Add to Cart</span>
@@ -54,8 +54,8 @@ function PharmacyCard({ vendor, onAddToCart }) {
   return (
     <article className="rounded-[28px] border border-emerald-100 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:p-8">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h3 className="text-3xl font-bold tracking-tight text-slate-950">{vendor.pharmacyName}</h3>
+        <div className="min-w-0">
+          <h3 className="break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{vendor.pharmacyName}</h3>
           <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 text-base text-slate-500">
             <div className="inline-flex items-center gap-2">
               <UserRound size={18} className="text-emerald-500" />
@@ -72,7 +72,7 @@ function PharmacyCard({ vendor, onAddToCart }) {
           </div>
         </div>
 
-        <div className="inline-flex min-w-[122px] flex-col items-center rounded-[22px] border border-amber-300 bg-amber-50 px-5 py-4 text-slate-950 shadow-[0_10px_24px_rgba(245,158,11,0.15)]">
+        <div className="inline-flex w-full flex-col items-center rounded-[22px] border border-amber-300 bg-amber-50 px-5 py-4 text-slate-950 shadow-[0_10px_24px_rgba(245,158,11,0.15)] sm:w-auto sm:min-w-[122px]">
           <BadgeCheck size={26} className="text-amber-500" />
           <p className="mt-2 text-3xl font-bold">{vendor.products.length}</p>
           <p className="text-sm text-slate-500">Products</p>
@@ -172,7 +172,7 @@ export default function LandingPage() {
               <Sparkles size={16} />
               Browse verified pharmacies
             </div>
-            <h2 className="text-3xl font-semibold leading-tight sm:text-4xl">
+            <h2 className="text-2xl font-semibold leading-tight sm:text-3xl lg:text-4xl">
               Shop medicines from approved vendor pharmacies
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-6 text-emerald-50 sm:text-base">
@@ -183,11 +183,11 @@ export default function LandingPage() {
 
         <section className="rounded-[24px] bg-white p-5 shadow-[0_20px_55px_rgba(15,23,42,0.08)] sm:p-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400 text-white shadow-md">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-white shadow-md">
               <Search size={18} />
             </div>
-            <div>
-              <h3 className="text-2xl font-semibold text-slate-900">Search Vendor Medicines</h3>
+            <div className="min-w-0">
+              <h3 className="text-xl font-semibold text-slate-900 sm:text-2xl">Search Vendor Medicines</h3>
               <p className="mt-1 text-sm text-slate-500">
                 Find products by medicine name, category, or pharmacy
               </p>
@@ -195,14 +195,14 @@ export default function LandingPage() {
           </div>
 
           <form className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center" onSubmit={handleSearchSubmit}>
-            <div className="flex flex-1 items-center gap-3 rounded-2xl border border-emerald-200 px-4 py-4">
-              <Search size={18} className="text-slate-400" />
+            <div className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-emerald-200 px-4 py-4">
+              <Search size={18} className="shrink-0 text-slate-400" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="e.g. Azithromycin, Aspirin, HealthFirst Pharmacy..."
-                className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+                className="min-w-0 w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
               />
             </div>
             <button
@@ -225,9 +225,9 @@ export default function LandingPage() {
         </section>
 
         <section>
-          <div className="mb-4 flex items-center gap-3">
+          <div className="mb-4 flex flex-wrap items-center gap-3">
             <div className="h-8 w-1 rounded-full bg-emerald-500" />
-            <h3 className="text-3xl font-semibold text-slate-900">Approved Pharmacies</h3>
+            <h3 className="text-2xl font-semibold text-slate-900 sm:text-3xl">Approved Pharmacies</h3>
             <div className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
               {filteredCatalog.length}
             </div>

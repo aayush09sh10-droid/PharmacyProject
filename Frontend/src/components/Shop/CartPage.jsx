@@ -111,12 +111,12 @@ export default function CartPage() {
 
         <section className="mt-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-100">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-100 sm:h-16 sm:w-16">
               <ShoppingCart size={28} />
             </div>
-            <div>
-              <h1 className="text-4xl font-semibold text-slate-900">Shopping Cart</h1>
-              <p className="mt-2 text-base text-slate-500">{cartCount} items in your cart</p>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-semibold text-slate-900 sm:text-4xl">Shopping Cart</h1>
+              <p className="mt-2 text-sm text-slate-500 sm:text-base">{cartCount} items in your cart</p>
             </div>
           </div>
         </section>
@@ -128,7 +128,7 @@ export default function CartPage() {
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm">
                   <ShoppingCart size={24} />
                 </div>
-                <h2 className="mt-5 text-3xl font-semibold text-slate-900">
+                <h2 className="mt-5 text-2xl font-semibold text-slate-900 sm:text-3xl">
                   Your cart is empty
                 </h2>
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base">
@@ -139,20 +139,20 @@ export default function CartPage() {
           </section>
         ) : (
           <section className="mt-8 grid gap-6 xl:grid-cols-[1.45fr_0.7fr]">
-            <article className="rounded-[24px] bg-white p-8 shadow-[0_18px_55px_rgba(15,23,42,0.1)]">
+            <article className="rounded-[24px] bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.1)] sm:p-8">
               <div className="space-y-4">
                 {items.map((item) => (
                   <div
                     key={`${item.productId}-${item.vendorId}`}
                     className="flex flex-col gap-4 rounded-[22px] border border-slate-200 px-5 py-5 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div>
-                      <h2 className="text-xl font-semibold text-slate-900">{item.name}</h2>
+                    <div className="min-w-0">
+                      <h2 className="break-words text-lg font-semibold text-slate-900 sm:text-xl">{item.name}</h2>
                       <p className="mt-1 text-sm text-slate-500">{item.vendorName}</p>
                       <p className="mt-2 text-sm font-medium text-emerald-600">{formatCurrency(item.price)} each</p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                       <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-2">
                         <button
                           type="button"
@@ -177,7 +177,7 @@ export default function CartPage() {
                         </button>
                       </div>
 
-                      <p className="min-w-24 text-right text-lg font-bold text-slate-950">
+                      <p className="text-left text-lg font-bold text-slate-950 sm:min-w-24 sm:text-right">
                         {formatCurrency(Number(item.price || 0) * Number(item.quantity || 0))}
                       </p>
 
@@ -194,7 +194,7 @@ export default function CartPage() {
               </div>
             </article>
 
-            <aside className="rounded-[24px] bg-white p-8 shadow-[0_18px_55px_rgba(15,23,42,0.1)]">
+            <aside className="rounded-[24px] bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.1)] sm:p-8">
               <h2 className="text-2xl font-semibold text-slate-900">Order Summary</h2>
 
               <div className="mt-6 space-y-4 text-sm text-slate-500">

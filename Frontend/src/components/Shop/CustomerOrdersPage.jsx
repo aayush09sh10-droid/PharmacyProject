@@ -142,11 +142,11 @@ export default function CustomerOrdersPage() {
         <BackButton label="Back to Home" onClick={() => navigate("/")} />
 
         <section className="mt-6 flex items-start gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-100">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-100 sm:h-16 sm:w-16">
             <ShoppingBag size={28} />
           </div>
-          <div>
-            <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">My Orders</h1>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold text-slate-900 sm:text-4xl">My Orders</h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-500 sm:text-base">
               Track your pharmacy purchases and cancel orders before they are shipped.
             </p>
@@ -259,9 +259,9 @@ export default function CustomerOrdersPage() {
                   <div className="flex flex-col gap-4 rounded-[20px] border border-slate-200 bg-slate-50/80 p-4 xl:min-w-[240px]">
                     <div className="flex items-center gap-3">
                       <Truck className="text-emerald-500" size={20} />
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-slate-500">Total</p>
-                        <p className="text-2xl font-bold text-slate-950">{formatCurrency(order.totalAmount)}</p>
+                        <p className="break-words text-2xl font-bold text-slate-950">{formatCurrency(order.totalAmount)}</p>
                       </div>
                     </div>
                     {canCancelOrder(order.status) ? (

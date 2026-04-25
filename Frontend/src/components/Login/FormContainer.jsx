@@ -1,6 +1,6 @@
 export default function FormContainer({ children }) {
   return (
-    <div className="max-w-md w-full mx-auto bg-white rounded-3xl shadow-xl p-10 mt-12 border border-gray-100">
+    <div className="mt-8 w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-xl sm:mt-12 sm:p-10">
       {children}
     </div>
   );

@@ -220,7 +220,7 @@ function AdminTopbar({ onOpenMenu }) {
           <Menu size={18} />
         </button>
         <div className="min-w-0">
-          <h1 className="truncate text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[3.2rem]">
+          <h1 className="truncate text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[2.6rem]">
             {currentSection}
           </h1>
           <p className="mt-1 text-sm text-slate-500 sm:text-base lg:mt-2 lg:text-[1.05rem]">
@@ -454,7 +454,7 @@ function DataTablePage({
                         <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                           {column.label}
                         </span>
-                        <div className="min-w-0 text-right text-sm text-slate-700">
+                        <div className="min-w-0 break-words text-right text-sm text-slate-700">
                           {column.render ? column.render(row) : row[column.key]}
                         </div>
                       </div>
@@ -484,9 +484,11 @@ function DataTablePage({
                     style={{ gridTemplateColumns: `${columns.map((column) => column.width || "1fr").join(" ")}${actionRenderer ? " auto" : ""}` }}
                   >
                     {columns.map((column) => (
-                      <div key={column.key}>{column.render ? column.render(row) : row[column.key]}</div>
+                      <div key={column.key} className="min-w-0 break-words pr-3">
+                        {column.render ? column.render(row) : row[column.key]}
+                      </div>
                     ))}
-                    {actionRenderer ? <div>{actionRenderer(row)}</div> : null}
+                    {actionRenderer ? <div className="min-w-0">{actionRenderer(row)}</div> : null}
                   </div>
                 ))}
               </div>

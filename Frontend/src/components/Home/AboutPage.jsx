@@ -56,8 +56,8 @@ export default function AboutPage() {
         </div>
 
         <section className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-semibold text-slate-900">About PharmaCare</h2>
-          <p className="mt-5 text-lg leading-8 text-slate-600">
+          <h2 className="text-3xl font-semibold text-slate-900 sm:text-4xl">About PharmaCare</h2>
+          <p className="mt-5 text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
             Your trusted partner in finding affordable healthcare solutions. We
             connect you with the best pharmacies in your area.
           </p>
@@ -68,8 +68,8 @@ export default function AboutPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm">
               <Crosshair size={24} />
             </div>
-            <h3 className="mt-6 text-3xl font-semibold text-slate-900">Our Mission</h3>
-            <p className="mt-4 text-base leading-8 text-slate-600">
+            <h3 className="mt-6 text-2xl font-semibold text-slate-900 sm:text-3xl">Our Mission</h3>
+            <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
               To make healthcare accessible and affordable for everyone by
               providing transparent pricing, real-time availability, and easy
               access to pharmacies in your community.
@@ -80,8 +80,8 @@ export default function AboutPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm">
               <Heart size={24} />
             </div>
-            <h3 className="mt-6 text-3xl font-semibold text-slate-900">Our Vision</h3>
-            <p className="mt-4 text-base leading-8 text-slate-600">
+            <h3 className="mt-6 text-2xl font-semibold text-slate-900 sm:text-3xl">Our Vision</h3>
+            <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
               A world where everyone has instant access to life-saving
               medications at fair prices, with the convenience of modern
               technology and the trust of traditional pharmacy care.
@@ -90,7 +90,7 @@ export default function AboutPage() {
         </section>
 
         <section className="mt-16">
-          <h3 className="text-center text-4xl font-semibold text-slate-900">
+          <h3 className="text-center text-3xl font-semibold text-slate-900 sm:text-4xl">
             Why Choose PharmaCare?
           </h3>
 
@@ -105,10 +105,10 @@ export default function AboutPage() {
                   >
                     <Icon size={28} />
                   </div>
-                  <h4 className="mt-5 text-2xl font-medium text-slate-900">
+                  <h4 className="mt-5 text-xl font-medium text-slate-900 sm:text-2xl">
                     {feature.title}
                   </h4>
-                  <p className="mt-4 text-base leading-8 text-slate-600">
+                  <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
                     {feature.description}
                   </p>
                 </article>
@@ -132,10 +132,10 @@ export default function AboutPage() {
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 text-blue-600">
             <Users size={40} />
           </div>
-          <h3 className="mt-6 text-4xl font-semibold text-slate-900">
+          <h3 className="mt-6 text-3xl font-semibold text-slate-900 sm:text-4xl">
             Built by Healthcare Experts
           </h3>
-          <p className="mt-5 text-lg leading-8 text-slate-600">
+          <p className="mt-5 text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
             Our team consists of pharmacists, healthcare professionals, and
             technology experts dedicated to improving healthcare accessibility
             for everyone.

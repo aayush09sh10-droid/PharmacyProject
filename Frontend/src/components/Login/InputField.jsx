@@ -23,10 +23,10 @@ export default function InputField({
 
   return (
     <div className="mb-5 w-full text-left">
-      <label className="mb-2 block font-medium text-gray-700">{label}</label>
+      <label className="mb-2 block text-sm font-medium text-gray-700 sm:text-base">{label}</label>
 
-      <div className="flex items-center rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 shadow-sm transition focus-within:border-green-500">
-        <span className="mr-3 text-gray-400">
+      <div className="flex items-center rounded-xl border border-gray-300 bg-gray-50 px-3 py-3 shadow-sm transition focus-within:border-green-500 sm:px-4">
+        <span className="mr-3 shrink-0 text-gray-400">
           {IconComponent ? <IconComponent size={18} /> : icon}
         </span>
 
@@ -37,13 +37,13 @@ export default function InputField({
           onChange={onChange}
           autoComplete={autoComplete}
           placeholder={placeholder}
-          className="w-full bg-transparent text-gray-700 outline-none"
+          className="min-w-0 w-full bg-transparent text-sm text-gray-700 outline-none sm:text-base"
         />
 
         {type === "password" && (
           <button
             type="button"
-            className="text-gray-400"
+            className="shrink-0 text-gray-400"
             onClick={() => setShow(!show)}
           >
             {show ? <EyeOff size={18} /> : <Eye size={18} />}

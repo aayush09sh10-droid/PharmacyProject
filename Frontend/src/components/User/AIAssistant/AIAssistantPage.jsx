@@ -93,15 +93,15 @@ export default function AIAssistantPage() {
           <div className="bg-linear-to-r from-fuchsia-700 via-violet-600 to-blue-600 px-6 py-8 text-white sm:px-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="flex items-start gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/15 text-white shadow-lg">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-white/15 text-white shadow-lg sm:h-16 sm:w-16">
                   <Sparkles size={30} />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-medium">
                     <Bot size={16} />
                     PharmaCare Intelligence
                   </div>
-                  <h1 className="mt-4 text-3xl font-semibold sm:text-4xl">AI Assistant</h1>
+                  <h1 className="mt-4 text-2xl font-semibold sm:text-4xl">AI Assistant</h1>
                   <p className="mt-2 max-w-2xl text-sm text-violet-100 sm:text-base">
                     Ask medication, pharmacy, and wellness questions in a familiar chat experience built into your user portal.
                   </p>
@@ -129,7 +129,7 @@ export default function AIAssistantPage() {
 
           <div className="border-b border-slate-200 bg-white px-6 py-6 sm:px-8">
             <div className="space-y-6">
-              <div className="max-h-[30rem] space-y-5 overflow-y-auto pr-1">
+              <div className="max-h-[30rem] space-y-5 overflow-y-auto pr-1 sm:pr-2">
                 {messages.map((message) => (
                   <AIMessageBubble key={message.id} message={message} />
                 ))}
@@ -169,14 +169,14 @@ export default function AIAssistantPage() {
             </div>
 
             <form className="mt-6 flex flex-col gap-4 sm:flex-row" onSubmit={handleSubmit}>
-              <div className="flex-1 rounded-[24px] border border-slate-200 bg-white px-5 py-4 shadow-sm">
+              <div className="min-w-0 flex-1 rounded-[24px] border border-slate-200 bg-white px-5 py-4 shadow-sm">
                 <input
                   type="text"
                   value={inputValue}
                   onChange={(event) => setInputValue(event.target.value)}
                   placeholder="Ask me anything about medications, pharmacies, or health..."
-                  className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
-                />
+                className="w-full min-w-0 bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
+              />
               </div>
               <button
                 type="submit"

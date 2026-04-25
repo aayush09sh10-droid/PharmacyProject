@@ -75,7 +75,7 @@ export default function NotificationBell({
       </button>
 
       {isOpen ? (
-        <div className={`absolute right-0 z-40 mt-3 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.16)] ${panelClassName}`}>
+        <div className={`absolute right-0 z-40 mt-3 w-[20rem] max-w-[calc(100vw-1.25rem)] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.16)] sm:w-[22rem] sm:max-w-[calc(100vw-2rem)] ${panelClassName}`}>
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
@@ -106,10 +106,10 @@ export default function NotificationBell({
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <h4 className="text-sm font-semibold text-slate-900">{notification.title}</h4>
+                    <h4 className="break-words text-sm font-semibold text-slate-900">{notification.title}</h4>
                     {!notification.isRead ? <span className="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-500" /> : null}
                   </div>
-                  <p className="mt-2 text-sm text-slate-600">{notification.message}</p>
+                  <p className="mt-2 break-words text-sm text-slate-600">{notification.message}</p>
                   <p className="mt-2 text-xs text-slate-400">{formatRelativeTime(notification.createdAt)}</p>
                 </button>
               ))
