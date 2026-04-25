@@ -40,6 +40,7 @@ export default function CustomerOrdersPage() {
   const [error, setError] = useState("");
   const [cartCount, setCartCount] = useState(() => getCartCount());
   const [cancellingOrderId, setCancellingOrderId] = useState("");
+  const [view, setView] = useState("all");
 
   const loadOrders = async () => {
     try {
@@ -95,6 +96,18 @@ export default function CustomerOrdersPage() {
     }
   };
 
+  const filteredOrders = orders.filter((order) => {
+    if (view === "cancelled") {
+      return order.status === "Cancelled";
+    }
+
+    if (view === "active") {
+      return order.status !== "Cancelled";
+    }
+
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-[#f5fcfb] text-slate-900">
       <PharmaHeader activePage="orders" cartCount={cartCount} showCustomerMenu />
@@ -114,6 +127,38 @@ export default function CustomerOrdersPage() {
           </div>
         </section>
 
+        {!loading && orders.length > 0 ? (
+          <section className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => setView("all")}
+              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                view === "all" ? "bg-emerald-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              All Orders
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("active")}
+              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                view === "active" ? "bg-blue-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              Active Orders
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("cancelled")}
+              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                view === "cancelled" ? "bg-rose-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              Cancelled Orders
+            </button>
+          </section>
+        ) : null}
+
         {loading ? (
           <div className="mt-8 rounded-[24px] bg-white p-8 text-lg text-slate-500 shadow-[0_18px_55px_rgba(15,23,42,0.1)]">
             Loading your orders...
@@ -122,15 +167,21 @@ export default function CustomerOrdersPage() {
           <div className="mt-8 rounded-[24px] border border-red-200 bg-red-50 p-8 text-lg text-red-700 shadow-[0_18px_55px_rgba(15,23,42,0.1)]">
             {error}
           </div>
-        ) : orders.length === 0 ? (
+        ) : filteredOrders.length === 0 ? (
           <div className="mt-8 rounded-[24px] bg-white p-10 text-center shadow-[0_18px_55px_rgba(15,23,42,0.1)]">
             <Package size={30} className="mx-auto text-emerald-500" />
-            <h2 className="mt-4 text-2xl font-semibold text-slate-900">No orders yet</h2>
-            <p className="mt-2 text-slate-500">Your placed pharmacy orders will appear here.</p>
+            <h2 className="mt-4 text-2xl font-semibold text-slate-900">
+              {view === "cancelled" ? "No cancelled orders" : "No orders yet"}
+            </h2>
+            <p className="mt-2 text-slate-500">
+              {view === "cancelled"
+                ? "Cancelled orders will appear here."
+                : "Your placed pharmacy orders will appear here."}
+            </p>
           </div>
         ) : (
           <div className="mt-8 space-y-4">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <article
                 key={order._id}
                 className="rounded-[24px] bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.1)]"

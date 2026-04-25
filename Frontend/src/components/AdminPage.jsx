@@ -50,6 +50,8 @@ const alertStyles = {
   success: "border-emerald-300 bg-emerald-50 text-emerald-800",
 };
 
+const PAGE_SIZE = 10;
+
 function formatMetricValue(card) {
   if (card.isCurrency) {
     const value = Number(card.value || 0);
@@ -75,6 +77,24 @@ function getOrderStatusTone(status) {
     default:
       return "bg-amber-50 text-amber-700";
   }
+}
+
+function getSearchableText(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => getSearchableText(item)).join(" ");
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value)
+      .map((item) => getSearchableText(item))
+      .join(" ");
+  }
+
+  return String(value);
 }
 
 function AdminSidebar({ adminName, onLogout, isLoggingOut, isMobileOpen, onClose }) {
@@ -310,21 +330,76 @@ function DashboardPage() {
   );
 }
 
-function DataTablePage({ title, subtitle, columns, rows, loading, emptyText, actionRenderer, mobileSummary }) {
+function DataTablePage({
+  title,
+  subtitle,
+  columns,
+  rows,
+  loading,
+  emptyText,
+  actionRenderer,
+  mobileSummary,
+  searchPlaceholder,
+  renderToolbar,
+}) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filteredRows = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) {
+      return rows;
+    }
+
+    return rows.filter((row) => getSearchableText(row).toLowerCase().includes(query));
+  }, [rows, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  const paginatedRows = filteredRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, rows]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   return (
     <div className="p-4 sm:p-6 lg:p-10">
       <section className="rounded-[2.25rem] bg-white p-5 shadow-[0_20px_45px_rgba(148,163,184,0.18)] sm:p-8 lg:p-10">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[2.15rem]">{title}</h2>
-        <p className="mt-2 text-sm text-slate-500 sm:text-lg lg:text-xl">{subtitle}</p>
+        <div className="sticky top-0 z-10 -mx-5 -mt-5 border-b border-slate-200 bg-white/95 px-5 py-5 backdrop-blur sm:-mx-8 sm:-mt-8 sm:px-8 sm:py-6 lg:-mx-10 lg:-mt-10 lg:px-10 lg:py-7">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[2.15rem]">{title}</h2>
+          <p className="mt-2 text-sm text-slate-500 sm:text-lg lg:text-xl">{subtitle}</p>
+
+          <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder={searchPlaceholder || `Search ${title.toLowerCase()}...`}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-violet-300 focus:bg-white focus:ring-2 focus:ring-violet-200 sm:max-w-md"
+              />
+              <div className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-600">
+                {filteredRows.length} result{filteredRows.length === 1 ? "" : "s"}
+              </div>
+            </div>
+            {renderToolbar ? <div className="flex flex-wrap gap-2">{renderToolbar()}</div> : null}
+          </div>
+        </div>
 
         {loading ? (
           <div className="mt-8 text-base text-slate-500 sm:text-lg">Loading...</div>
-        ) : rows.length === 0 ? (
+        ) : filteredRows.length === 0 ? (
           <div className="mt-8 text-base text-slate-500 sm:text-lg">{emptyText}</div>
         ) : (
           <>
             <div className="mt-8 space-y-4 lg:hidden">
-              {rows.map((row, index) => (
+              {paginatedRows.map((row, index) => (
                 <article
                   key={row.id || row._id || index}
                   className="rounded-[1.5rem] border border-slate-200 px-4 py-4"
@@ -358,7 +433,7 @@ function DataTablePage({ title, subtitle, columns, rows, loading, emptyText, act
                 {actionRenderer ? <div>Actions</div> : null}
               </div>
               <div className="divide-y divide-slate-200">
-                {rows.map((row, index) => (
+                {paginatedRows.map((row, index) => (
                   <div
                     key={row.id || row._id || index}
                     className="grid items-center px-6 py-5 text-[1.03rem] text-slate-700"
@@ -370,6 +445,46 @@ function DataTablePage({ title, subtitle, columns, rows, loading, emptyText, act
                     {actionRenderer ? <div>{actionRenderer(row)}</div> : null}
                   </div>
                 ))}
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-slate-500">
+                Page {currentPage} of {totalPages}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                >
+                  First
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                  disabled={currentPage === 1}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                  disabled={currentPage === totalPages}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Next
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Last
+                </button>
               </div>
             </div>
           </>
@@ -486,6 +601,7 @@ function UsersPage() {
         { key: "role", label: "Role", width: "0.7fr" },
         { key: "userName", label: "User Name", width: "1fr" },
       ]}
+      searchPlaceholder="Search users by name, email, role, or username"
       actionRenderer={(row) => (
         <button
           type="button"
@@ -531,6 +647,7 @@ function VendorsPage() {
         { key: "email", label: "Email", width: "1.3fr" },
         { key: "status", label: "Status", width: "0.8fr" },
       ]}
+      searchPlaceholder="Search vendors by pharmacy, owner, email, or status"
       actionRenderer={(row) => (
         <button
           type="button"
@@ -551,6 +668,7 @@ function VendorsPage() {
 function OrdersPage() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState("all");
 
   useEffect(() => {
     const load = async () => {
@@ -563,13 +681,57 @@ function OrdersPage() {
     load();
   }, []);
 
+  const filteredRows = useMemo(() => {
+    if (view === "cancelled") {
+      return rows.filter((row) => row.status === "Cancelled");
+    }
+
+    if (view === "active") {
+      return rows.filter((row) => row.status !== "Cancelled");
+    }
+
+    return rows;
+  }, [rows, view]);
+
   return (
     <DataTablePage
       title="Orders"
       subtitle="Platform order activity coming from the vendor system."
       loading={loading}
-      rows={rows}
-      emptyText="No orders found."
+      rows={filteredRows}
+      emptyText={view === "cancelled" ? "No cancelled orders found." : "No orders found."}
+      searchPlaceholder="Search orders by order ID, customer, status, payment method, or cancellation reason"
+      renderToolbar={() => (
+        <>
+          <button
+            type="button"
+            onClick={() => setView("all")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+              view === "all" ? "bg-violet-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            All Orders
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("active")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+              view === "active" ? "bg-emerald-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            Active
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("cancelled")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+              view === "cancelled" ? "bg-rose-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            Cancelled
+          </button>
+        </>
+      )}
       columns={[
         { key: "orderId", label: "Order", width: "1fr" },
         { key: "customerName", label: "Customer", width: "1fr" },
@@ -641,6 +803,7 @@ function PaymentsPage() {
           render: (row) => `Rs ${Number(row.amount || 0).toFixed(2)}`,
         },
       ]}
+      searchPlaceholder="Search payments by order ID, customer, method, or payment status"
     />
   );
 }
