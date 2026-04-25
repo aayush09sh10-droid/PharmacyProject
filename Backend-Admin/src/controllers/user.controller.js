@@ -3,8 +3,36 @@ import axios from "axios";
 import { ApiError } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.util.js";
 import { ApiResponse } from "../utils/apiResponse.js";
-import { getAllOrders, updateOrderById } from "../services/vendor.service.js";
+import { getAllOrders, getPublicCatalog, updateOrderById } from "../services/vendor.service.js";
 import { createNotification } from "../services/notification.service.js";
+
+const isPharmacyLocatorPrompt = (prompt = "") =>
+    /24[\s-]*hour|nearby pharmacy|near me|pharmacy|find pharmacies|open now/i.test(prompt);
+
+const buildPharmacyLocatorReply = (prompt, catalog = []) => {
+    if (!Array.isArray(catalog) || catalog.length === 0) {
+        return [
+            "I could not find any approved pharmacies with published catalog entries right now.",
+            "Please try again later or browse the pharmacy listings on the home page.",
+        ].join("\n\n");
+    }
+
+    const topMatches = catalog.slice(0, 5).map((vendor, index) => {
+        const medicineCount = Array.isArray(vendor.products) ? vendor.products.length : 0;
+        return `${index + 1}. ${vendor.pharmacyName} - Owner: ${vendor.ownerName} - Phone: ${vendor.phone} - ${medicineCount} medicines listed`;
+    });
+
+    const promptRequests24Hour = /24[\s-]*hour|open now/i.test(prompt);
+    const intro = promptRequests24Hour
+        ? "I can show approved pharmacies from your app catalog, but I cannot confirm 24-hour opening because store hours are not stored in the current data."
+        : "Here are approved pharmacies currently available in your app catalog.";
+
+    return [
+        intro,
+        topMatches.join("\n"),
+        "You can also open the home page to browse their listed medicines and contact them directly.",
+    ].join("\n\n");
+};
 
 const buildFallbackAssistantReply = (prompt) => {
     const normalizedPrompt = prompt.toLowerCase();
@@ -408,6 +436,21 @@ const askAiAssistant = asyncHandler(async (req, res) => {
 
     if (!prompt) {
         throw new ApiError(400, "Prompt is required");
+    }
+
+    if (isPharmacyLocatorPrompt(prompt)) {
+        const catalog = await getPublicCatalog();
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                {
+                    prompt,
+                    reply: buildPharmacyLocatorReply(prompt, catalog),
+                    provider: "catalog",
+                },
+                "Pharmacy catalog response generated successfully"
+            )
+        );
     }
 
     if (!apiKey) {

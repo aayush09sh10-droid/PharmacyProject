@@ -5,6 +5,7 @@ const API_ROOT = process.env.VENDOR_API_ROOT || "http://localhost:8001/api/v1";
 const VENDOR_BASE_URL = `${API_ROOT}/vendors`;
 const ORDER_BASE_URL = `${API_ROOT}/orders`;
 const DASHBOARD_BASE_URL = `${API_ROOT}/dashboard`;
+const PRODUCT_BASE_URL = `${API_ROOT}/products`;
 
 const internalHeaders = () => ({
   "x-api-key": process.env.INTERNAL_API_KEY,
@@ -95,6 +96,18 @@ const getVendorDashboardStats = async () => {
   }
 };
 
+const getPublicCatalog = async () => {
+  try {
+    const response = await axios.get(`${PRODUCT_BASE_URL}/catalog`);
+    return response.data.data ?? [];
+  } catch (error) {
+    if (isNetworkFailure(error)) {
+      return [];
+    }
+    wrapVendorError(error, "Failed to fetch public catalog");
+  }
+};
+
 const updateOrderById = async (orderId, payload) => {
   try {
     const response = await axios.patch(`${ORDER_BASE_URL}/admin/${orderId}`, payload, {
@@ -107,4 +120,12 @@ const updateOrderById = async (orderId, payload) => {
   }
 };
 
-export { approveVendor, deleteVendor, getAllOrders, getAllVendors, getVendorDashboardStats, updateOrderById };
+export {
+  approveVendor,
+  deleteVendor,
+  getAllOrders,
+  getAllVendors,
+  getPublicCatalog,
+  getVendorDashboardStats,
+  updateOrderById,
+};
