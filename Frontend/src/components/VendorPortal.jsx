@@ -43,12 +43,22 @@ const navItems = [
   { name: "Orders", icon: ClipboardList, path: "orders" },
 ];
 
+const vendorShell = {
+  page: "bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.16),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(251,191,36,0.14),_transparent_24%),linear-gradient(180deg,_#f5fbf7_0%,_#eef6f1_100%)]",
+  card: "border border-emerald-100/80 bg-white/88 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-sm",
+  mutedCard: "border border-emerald-100/70 bg-emerald-50/70",
+  sidebar: "border-r border-emerald-200/80 bg-[linear-gradient(180deg,_#0f3d2e_0%,_#14532d_55%,_#1f6b4f_100%)] text-emerald-50 shadow-[0_24px_60px_rgba(6,78,59,0.28)]",
+  sidebarSoft: "border-white/10 bg-white/8 text-emerald-50/80",
+  sidebarActive: "bg-white text-emerald-900 shadow-[0_16px_40px_rgba(255,255,255,0.18)]",
+  sidebarIdle: "text-emerald-50/78 hover:bg-white/8 hover:text-white",
+};
+
 function PendingApprovalPanel({ vendor }) {
   const isRejected = vendor.status === "rejected";
 
   return (
     <div className="mx-auto max-w-5xl pb-10">
-      <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
+      <div className={`rounded-3xl p-4 sm:p-6 ${vendorShell.card}`}>
         <div
           className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold sm:text-xs ${
             isRejected
@@ -60,12 +70,12 @@ function PendingApprovalPanel({ vendor }) {
           <span>{isRejected ? "Vendor Rejected" : "Pending Approval"}</span>
         </div>
 
-        <h1 className="mt-4 text-xl font-black tracking-tight text-gray-900 sm:text-2xl">
+        <h1 className="mt-4 text-xl font-black tracking-tight text-emerald-950 sm:text-2xl">
           {isRejected
             ? "Your vendor account has not been approved"
             : "Your vendor account is waiting for admin approval"}
         </h1>
-        <p className="mt-3 text-sm leading-6 text-gray-500">
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           {isRejected
             ? "Inventory and order tools stay locked until the registration issue is resolved."
             : "You can sign in and view your profile, but management tools will unlock only after admin approval."}
@@ -77,11 +87,11 @@ function PendingApprovalPanel({ vendor }) {
             { label: "Owner", value: vendor.ownerName || vendor.name },
             { label: "Status", value: vendor.status || "pending" },
           ].map((item) => (
-            <div key={item.label} className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <div key={item.label} className={`rounded-2xl p-4 ${vendorShell.mutedCard}`}>
+              <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700/60">
                 {item.label}
               </p>
-              <p className="mt-2 break-words text-sm font-bold capitalize text-gray-900 sm:text-base">
+              <p className="mt-2 break-words text-sm font-bold capitalize text-emerald-950 sm:text-base">
                 {item.value}
               </p>
             </div>
@@ -101,15 +111,15 @@ const StatCard = ({ icon, value, label, color }) => {
   };
 
   return (
-    <div className="flex min-h-28 flex-col justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:min-h-36 sm:p-5">
+    <div className={`flex min-h-28 flex-col justify-between rounded-[1.6rem] p-4 transition-all hover:-translate-y-0.5 sm:min-h-36 sm:p-5 ${vendorShell.card}`}>
       <div className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-inner sm:h-10 sm:w-10 ${colors[color]}`}>
         {createElement(icon, { size: 16, className: "sm:h-[18px] sm:w-[18px]" })}
       </div>
       <div>
-        <h2 className="break-words text-lg font-black tracking-tight text-gray-900 sm:text-2xl">
+        <h2 className="break-words text-lg font-black tracking-tight text-emerald-950 sm:text-2xl">
           {value}
         </h2>
-        <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-gray-400 sm:text-xs">
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-emerald-800/55 sm:text-xs">
           {label}
         </p>
       </div>
@@ -130,8 +140,8 @@ function VendorDashboardPage({ stats, loading }) {
   return (
     <div className="mx-auto max-w-6xl space-y-5 pb-12">
       <div>
-        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Dashboard Overview</h1>
-        <p className="mt-1 text-xs text-gray-500 sm:text-sm">Real-time pharmacy analytics and alerts</p>
+        <h1 className="text-xl font-bold text-emerald-950 sm:text-2xl">Dashboard Overview</h1>
+        <p className="mt-1 text-xs text-slate-600 sm:text-sm">Real-time pharmacy analytics and alerts</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -147,9 +157,9 @@ function VendorDashboardPage({ stats, loading }) {
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5 lg:col-span-2">
+        <div className={`rounded-[1.75rem] p-4 sm:p-5 lg:col-span-2 ${vendorShell.card}`}>
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h3 className="text-base font-bold text-gray-900 sm:text-lg">Recent Transactions</h3>
+            <h3 className="text-base font-bold text-emerald-950 sm:text-lg">Recent Transactions</h3>
             <div className="flex items-center gap-1 text-xs font-semibold text-emerald-500">
               <span>Latest orders</span>
               <Package size={12} />
@@ -166,25 +176,25 @@ function VendorDashboardPage({ stats, loading }) {
               stats.recentOrders.map((order, index) => (
                 <div
                   key={order._id || index}
-                  className="flex flex-col gap-3 rounded-xl border border-gray-100 p-4 transition hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/45 p-4 transition hover:border-emerald-200 hover:bg-white sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500">
                       <Package size={16} />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="truncate text-sm font-bold text-gray-900">{order.orderId}</h4>
-                      <p className="break-words text-xs text-gray-500">
+                      <h4 className="truncate text-sm font-bold text-emerald-950">{order.orderId}</h4>
+                      <p className="break-words text-xs text-slate-600">
                         {order.customerName} • {order.items?.length || 0} items
                       </p>
-                      <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800/50">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-3 sm:justify-end">
                     <div className="sm:text-right">
-                      <p className="text-sm font-bold text-gray-900">
+                      <p className="text-sm font-bold text-emerald-950">
                         Rs {Number(order.totalAmount).toFixed(2)}
                       </p>
                       <span
@@ -199,7 +209,7 @@ function VendorDashboardPage({ stats, loading }) {
                         {order.status}
                       </span>
                     </div>
-                    <div className="rounded-lg p-2 text-gray-400">
+                    <div className="rounded-lg bg-white/80 p-2 text-emerald-700/60">
                       <Eye size={15} />
                     </div>
                   </div>
@@ -209,11 +219,11 @@ function VendorDashboardPage({ stats, loading }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+        <div className={`rounded-[1.75rem] p-4 sm:p-5 ${vendorShell.card}`}>
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-gray-900 sm:text-lg">Critical Stock</h3>
-              <p className="mt-1 text-xs text-gray-500">Items below threshold (20)</p>
+              <h3 className="text-base font-bold text-emerald-950 sm:text-lg">Critical Stock</h3>
+              <p className="mt-1 text-xs text-slate-600">Items below threshold (20)</p>
             </div>
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-50 text-orange-500">
               <AlertTriangle size={13} />
@@ -228,9 +238,9 @@ function VendorDashboardPage({ stats, loading }) {
               </div>
             ) : (
               stats.lowStockProducts.map((item, index) => (
-                <div key={item._id || index} className="rounded-xl border border-orange-100/60 bg-orange-50/50 p-4">
+                <div key={item._id || index} className="rounded-2xl border border-amber-100/70 bg-amber-50/65 p-4">
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="truncate text-sm font-bold text-gray-900">{item.name}</span>
+                    <span className="truncate text-sm font-bold text-emerald-950">{item.name}</span>
                     <span className="whitespace-nowrap rounded-full bg-orange-100 px-2 py-1 text-[10px] font-bold text-orange-600">
                       {item.stock} left
                     </span>
@@ -242,7 +252,7 @@ function VendorDashboardPage({ stats, loading }) {
                     />
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-medium italic text-gray-500">Type: {item.category}</p>
+                    <p className="text-[10px] font-medium italic text-slate-600">Type: {item.category}</p>
                     <span className="text-[10px] font-bold text-emerald-600">Restock</span>
                   </div>
                 </div>
@@ -258,13 +268,13 @@ function VendorDashboardPage({ stats, loading }) {
 function ProductModal({ title, product, setProduct, onClose, onSubmit, submitLabel, isSubmitting }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between rounded-t-2xl border-b border-gray-100 bg-gray-50/50 p-4 sm:p-5">
-          <h2 className="pr-3 text-base font-bold text-gray-900 sm:text-lg">{title}</h2>
+      <div className={`w-full max-w-lg rounded-[1.9rem] ${vendorShell.card}`}>
+        <div className="flex items-center justify-between rounded-t-[1.9rem] border-b border-emerald-100 bg-emerald-50/70 p-4 sm:p-5">
+          <h2 className="pr-3 text-base font-bold text-emerald-950 sm:text-lg">{title}</h2>
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-full p-1 text-gray-400 transition hover:bg-gray-200 disabled:opacity-50"
+            className="rounded-full p-1 text-emerald-700/60 transition hover:bg-white disabled:opacity-50"
           >
             <X size={18} />
           </button>
@@ -339,7 +349,7 @@ function ProductModal({ title, product, setProduct, onClose, onSubmit, submitLab
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+          <div className="flex items-center gap-3 rounded-xl bg-emerald-50/70 p-3">
             <input
               disabled={isSubmitting}
               type="checkbox"
@@ -348,7 +358,7 @@ function ProductModal({ title, product, setProduct, onClose, onSubmit, submitLab
               onChange={(e) => setProduct({ ...product, rxRequired: e.target.checked })}
               className="h-4 w-4 cursor-pointer rounded border-gray-300 text-emerald-500 focus:ring-emerald-500 disabled:opacity-50"
             />
-            <label htmlFor="rxRequired" className="cursor-pointer select-none text-sm font-semibold text-gray-700">
+            <label htmlFor="rxRequired" className="cursor-pointer select-none text-sm font-semibold text-emerald-950">
               Prescription Required (Rx)
             </label>
           </div>
@@ -358,7 +368,7 @@ function ProductModal({ title, product, setProduct, onClose, onSubmit, submitLab
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-xs font-bold uppercase tracking-widest text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="flex-1 rounded-xl border border-emerald-200 px-4 py-3 text-xs font-bold uppercase tracking-widest text-slate-700 transition hover:bg-emerald-50 disabled:opacity-50"
             >
               Cancel
             </button>
@@ -464,8 +474,8 @@ function VendorCatalogPage({ title, canManageInventory, inventoryMode = false })
   return (
     <div className="mx-auto max-w-6xl pb-12">
       <div className="mb-5">
-        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{title}</h1>
-        <p className="mt-1 text-xs text-gray-500 sm:text-sm">
+        <h1 className="text-xl font-bold text-emerald-950 sm:text-2xl">{title}</h1>
+        <p className="mt-1 text-xs text-slate-600 sm:text-sm">
           {inventoryMode ? "Manage your pharmacy operations" : "Manage your pharmacy catalog"}
         </p>
       </div>
@@ -497,19 +507,19 @@ function VendorCatalogPage({ title, canManageInventory, inventoryMode = false })
             <p className="text-sm">{inventoryMode ? "Loading inventory..." : "Loading catalog..."}</p>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 py-16 text-center text-sm italic text-gray-500">
+          <div className="rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/70 py-16 text-center text-sm italic text-slate-600">
             {inventoryMode ? "No products found in inventory." : "Your catalog is currently empty."}
           </div>
         ) : (
           filteredProducts.map((product) => (
             <div
               key={product._id}
-              className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5"
+              className={`rounded-[1.7rem] p-4 transition-all hover:-translate-y-0.5 sm:p-5 ${vendorShell.card}`}
             >
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <h3 className="break-words text-base font-bold text-gray-900 sm:text-lg">{product.name}</h3>
+                    <h3 className="break-words text-base font-bold text-emerald-950 sm:text-lg">{product.name}</h3>
                     {product.rxRequired && (
                       <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600">
                         Rx Required
@@ -522,20 +532,20 @@ function VendorCatalogPage({ title, canManageInventory, inventoryMode = false })
                     </p>
                     <p>
                       Stock:{" "}
-                      <span className={`font-bold ${product.stock < 10 ? "text-orange-500" : "text-gray-900"}`}>
+                      <span className={`font-bold ${product.stock < 10 ? "text-orange-500" : "text-emerald-950"}`}>
                         {product.stock}
                       </span>
                     </p>
                     <p>
-                      Expiry: <span className="font-medium text-gray-900">{product.expiry}</span>
+                      Expiry: <span className="font-medium text-emerald-950">{product.expiry}</span>
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:justify-end lg:gap-6">
                   <div className="sm:text-right">
-                    <p className="text-lg font-bold text-gray-900 sm:text-xl">Rs {Number(product.price).toFixed(2)}</p>
-                    <p className="text-xs text-gray-400">per unit</p>
+                    <p className="text-lg font-bold text-emerald-950 sm:text-xl">Rs {Number(product.price).toFixed(2)}</p>
+                    <p className="text-xs text-emerald-800/50">per unit</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -543,14 +553,14 @@ function VendorCatalogPage({ title, canManageInventory, inventoryMode = false })
                         setEditingProduct(product);
                         setIsEditModalOpen(true);
                       }}
-                      className="rounded-lg bg-white p-2 text-emerald-500 shadow-sm transition hover:bg-emerald-50"
+                      className="rounded-lg bg-emerald-50 p-2 text-emerald-600 shadow-sm transition hover:bg-emerald-100"
                       title="Edit Medicine"
                     >
                       <Edit2 size={15} />
                     </button>
                     <button
                       onClick={() => handleDeleteProduct(product._id)}
-                      className="rounded-lg bg-white p-2 text-red-500 shadow-sm transition hover:bg-red-50"
+                      className="rounded-lg bg-red-50 p-2 text-red-500 shadow-sm transition hover:bg-red-100"
                       title="Delete Medicine"
                     >
                       <Trash2 size={15} />
@@ -671,8 +681,8 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
   return (
     <div className="mx-auto max-w-6xl pb-12">
       <div className="mb-5">
-        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Orders</h1>
-        <p className="mt-1 text-xs text-gray-500 sm:text-sm">Manage your pharmacy operations</p>
+        <h1 className="text-xl font-bold text-emerald-950 sm:text-2xl">Orders</h1>
+        <p className="mt-1 text-xs text-slate-600 sm:text-sm">Manage your pharmacy operations</p>
       </div>
 
       <div className="space-y-3">
@@ -684,11 +694,11 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
           orders.map((order, index) => {
             const actions = getActions(order.status);
             return (
-              <div key={index} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+              <div key={index} className={`rounded-[1.7rem] p-4 sm:p-5 ${vendorShell.card}`}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-bold text-gray-900 sm:text-lg">{order.id}</h3>
+                      <h3 className="text-base font-bold text-emerald-950 sm:text-lg">{order.id}</h3>
                       <div className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${getStatusColor(order.status)}`}>
                         {order.status === "Pending" && <Package size={11} />}
                         {(order.status === "Delivered" || order.status === "Processing") && <Check size={11} />}
@@ -696,26 +706,26 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
                       </div>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-1 gap-3 text-sm text-gray-600 md:grid-cols-2 xl:grid-cols-4">
+                    <div className="mt-4 grid grid-cols-1 gap-3 text-sm text-slate-600 md:grid-cols-2 xl:grid-cols-4">
                       <div>
-                        <span className="mb-1 block text-gray-400">Customer:</span>
-                        <span className="break-words font-medium text-gray-900">{order.customer}</span>
+                        <span className="mb-1 block text-emerald-800/45">Customer:</span>
+                        <span className="break-words font-medium text-emerald-950">{order.customer}</span>
                       </div>
                       <div>
-                        <span className="mb-1 block text-gray-400">Date:</span>
-                        <span className="font-medium text-gray-900">{order.date}</span>
+                        <span className="mb-1 block text-emerald-800/45">Date:</span>
+                        <span className="font-medium text-emerald-950">{order.date}</span>
                       </div>
                       <div className="xl:col-span-2">
-                        <span className="mb-1 block text-gray-400">Address:</span>
-                        <span className="break-words font-medium text-gray-900">{order.address}</span>
+                        <span className="mb-1 block text-emerald-800/45">Address:</span>
+                        <span className="break-words font-medium text-emerald-950">{order.address}</span>
                       </div>
                       <div>
-                        <span className="mb-1 block text-gray-400">Items:</span>
-                        <span className="font-medium text-gray-900">{order.items} product(s)</span>
+                        <span className="mb-1 block text-emerald-800/45">Items:</span>
+                        <span className="font-medium text-emerald-950">{order.items} product(s)</span>
                       </div>
                       <div>
-                        <span className="mb-1 block text-gray-400">Payment:</span>
-                        <span className="font-medium text-gray-900">{order.paymentMethod || "Cash on Delivery"}</span>
+                        <span className="mb-1 block text-emerald-800/45">Payment:</span>
+                        <span className="font-medium text-emerald-950">{order.paymentMethod || "Cash on Delivery"}</span>
                       </div>
                     </div>
                     {order.cancellation?.byRole ? (
@@ -726,8 +736,8 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
                     ) : null}
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 border-t border-gray-100 pt-4 lg:ml-5 lg:min-w-[120px] lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-                    <p className="text-lg font-bold text-gray-900 sm:text-xl">Rs {Number(order.total).toFixed(2)}</p>
+                  <div className="flex items-center justify-between gap-4 border-t border-emerald-100 pt-4 lg:ml-5 lg:min-w-[120px] lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                    <p className="text-lg font-bold text-emerald-950 sm:text-xl">Rs {Number(order.total).toFixed(2)}</p>
                     <div className="flex flex-wrap items-center justify-end gap-2 lg:max-w-[180px]">
                       {actions.includes("accept") && (
                         <button
@@ -786,22 +796,22 @@ function VendorOrdersPage({ canManageInventory, onOrdersUpdated }) {
 function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar, onLogout }) {
   return (
     <aside
-      className={`flex h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ${
+      className={`flex h-full flex-col transition-all duration-300 ${vendorShell.sidebar} ${
         isCollapsed ? "w-14 sm:w-16" : "w-44 sm:w-52"
       }`}
     >
-      <div className="border-b border-gray-100 p-3 sm:p-4">
+      <div className="border-b border-white/10 p-3 sm:p-4">
         {!isCollapsed ? (
           <div>
-            <h1 className="text-sm font-bold text-gray-900 sm:text-base">Vendor Portal</h1>
-            <p className="mt-1 break-words text-[10px] text-gray-500 sm:text-[11px]">
+            <h1 className="text-sm font-bold text-white sm:text-base">Vendor Portal</h1>
+            <p className="mt-1 break-words text-[10px] text-emerald-50/70 sm:text-[11px]">
               {vendor.pharmacyName || "--"}
             </p>
             <div
               className={`mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[9px] font-medium sm:text-[10px] ${
                 canManageInventory
-                  ? "border-green-200 bg-green-50 text-green-700"
-                  : "border-amber-200 bg-amber-50 text-amber-700"
+                  ? "border-emerald-200/30 bg-emerald-300/15 text-emerald-50"
+                  : "border-amber-200/30 bg-amber-300/15 text-amber-100"
               }`}
             >
               {canManageInventory ? <CheckCircle2 size={10} /> : <Clock size={10} />}
@@ -810,7 +820,7 @@ function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar,
           </div>
         ) : (
           <div className="flex justify-center">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 text-white">
               <Store size={14} />
             </div>
           </div>
@@ -825,7 +835,7 @@ function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar,
             return (
               <div
                 key={item.name}
-                className="flex items-center gap-2 rounded-xl px-2.5 py-2.5 text-gray-400 sm:px-3"
+                className={`flex items-center gap-2 rounded-xl px-2.5 py-2.5 ${vendorShell.sidebarSoft} sm:px-3`}
               >
                 <item.icon size={15} />
                 {!isCollapsed && <span className="text-[11px] font-medium sm:text-xs">{item.name}</span>}
@@ -840,14 +850,14 @@ function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar,
               className={({ isActive }) =>
                 `flex items-center gap-2 rounded-xl px-2.5 py-2.5 transition-colors sm:px-3 ${
                   isActive
-                    ? "bg-emerald-500 text-white shadow-sm"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? vendorShell.sidebarActive
+                    : vendorShell.sidebarIdle
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <item.icon size={15} className={isActive ? "text-white" : "text-gray-500"} />
+                  <item.icon size={15} className={isActive ? "text-emerald-700" : "text-emerald-50/70"} />
                   {!isCollapsed && <span className="text-[11px] font-medium sm:text-xs">{item.name}</span>}
                 </>
               )}
@@ -856,17 +866,17 @@ function VendorSidebar({ vendor, canManageInventory, isCollapsed, toggleSidebar,
         })}
       </nav>
 
-      <div className="space-y-2 border-t border-gray-100 p-2 sm:p-3">
+      <div className="space-y-2 border-t border-white/10 p-2 sm:p-3">
         <button
           onClick={toggleSidebar}
-          className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2.5 text-left text-gray-600 transition hover:bg-gray-50 sm:px-3"
+          className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2.5 text-left text-emerald-50/82 transition hover:bg-white/8 hover:text-white sm:px-3"
         >
           {isCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
           {!isCollapsed && <span className="text-[11px] font-medium sm:text-xs">Collapse</span>}
         </button>
         <button
           onClick={onLogout}
-          className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2.5 text-left text-red-600 transition hover:bg-red-50 sm:px-3"
+          className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2.5 text-left text-rose-100 transition hover:bg-white/8 sm:px-3"
         >
           <LogOut size={15} />
           {!isCollapsed && <span className="text-[11px] font-medium sm:text-xs">Logout</span>}
@@ -943,7 +953,7 @@ export default function VendorPortal() {
   const canManageInventory = vendor.status === "approved";
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-sans">
+    <div className={`flex min-h-screen font-sans ${vendorShell.page}`}>
       <div
         className={`fixed inset-0 z-30 bg-slate-950/40 transition md:hidden ${
           isMobileSidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
@@ -980,19 +990,24 @@ export default function VendorPortal() {
         />
       </div>
 
-      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-slate-50">
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 shadow-sm md:hidden">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Vendor Portal</p>
-            <h1 className="truncate text-lg font-bold text-slate-900">{vendor.pharmacyName || "Vendor"}</h1>
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-transparent">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-emerald-100 bg-white/78 px-4 py-3 shadow-sm backdrop-blur-md md:hidden">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800"
+            >
+              <Menu size={18} />
+            </button>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800/45">Vendor Portal</p>
+              <h1 className="truncate text-lg font-bold text-emerald-950">{vendor.pharmacyName || "Vendor"}</h1>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsMobileSidebarOpen(true)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 text-slate-700"
-          >
-            <Menu size={18} />
-          </button>
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 shadow-sm">
+            <Store size={18} />
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6">
           <Routes>
