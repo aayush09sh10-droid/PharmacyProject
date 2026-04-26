@@ -12,6 +12,7 @@ import {
   Store,
   Users,
   X,
+  Settings,
 } from "lucide-react";
 import { clearAuthSession, getStoredUser, logoutUser } from "../services/auth.service.js";
 import {
@@ -33,6 +34,7 @@ const menuItems = [
   { name: "Orders", icon: ShoppingBag, path: "orders" },
   { name: "Payments", icon: DollarSign, path: "payments" },
   { name: "Reports", icon: BarChart3, path: "reports" },
+  { name: "Settings", icon: Settings, path: "settings" },
 ];
 
 const cardStyles = {
@@ -595,6 +597,47 @@ function ReportsPage() {
   );
 }
 
+function SettingsPage() {
+  const [apiKey, setApiKey] = useState(localStorage.getItem("gemini_api_key") || "");
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    localStorage.setItem("gemini_api_key", apiKey);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <div className="p-10 max-w-2xl">
+      <section className="rounded-[2.25rem] bg-white p-10 shadow-[0_20px_45px_rgba(148,163,184,0.18)]">
+        <h2 className="text-[2.15rem] font-bold tracking-tight text-slate-900">System Settings</h2>
+        <p className="mt-2 text-xl text-slate-500">Configure global application settings and API integrations.</p>
+        
+        <div className="mt-10 space-y-6">
+          <div>
+            <label className="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Gemini API Key</label>
+            <input 
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="Enter your Gemini API key"
+              className="w-full rounded-2xl border border-slate-200 p-5 text-lg outline-none focus:ring-2 focus:ring-violet-500"
+            />
+            <p className="mt-3 text-slate-400 text-sm italic">This key is used by the AI Chat Assistant to provide customer support.</p>
+          </div>
+
+          <button 
+            onClick={handleSave}
+            className="rounded-2xl bg-violet-600 px-8 py-4 text-lg font-bold text-white shadow-lg hover:bg-violet-700 transition flex items-center gap-2"
+          >
+            {saved ? "Settings Saved!" : "Save Configuration"}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [adminName, setAdminName] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -639,6 +682,7 @@ export default function AdminPage() {
             <Route path="orders" element={<OrdersPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </main>

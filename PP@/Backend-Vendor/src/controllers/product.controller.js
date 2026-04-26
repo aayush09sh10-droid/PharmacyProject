@@ -18,7 +18,8 @@ const createProduct = asyncHandler(async (req, res) => {
         price,
         expiry,
         rxRequired,
-        description
+        description,
+        vendorId: req.user?._id
     });
 
     return res.status(201).json(
@@ -27,7 +28,11 @@ const createProduct = asyncHandler(async (req, res) => {
 });
 
 const getAllProducts = asyncHandler(async (req, res) => {
-    const products = await Product.find().sort({ name: 1 });
+    let filter = {};
+    if (!req.isInternal && req.user) {
+        filter = { vendorId: req.user._id };
+    }
+    const products = await Product.find(filter).sort({ name: 1 });
     return res.status(200).json(
         new ApiResponse(200, products, "Products fetched successfully")
     );
@@ -50,8 +55,8 @@ const updateProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { name, category, stock, price, expiry, rxRequired, description } = req.body;
 
-    const product = await Product.findByIdAndUpdate(
-        id,
+    const product = await Product.findOneAndUpdate(
+        { _id: id, vendorId: req.user?._id },
         {
             $set: {
                 name,
@@ -77,7 +82,7 @@ const updateProduct = asyncHandler(async (req, res) => {
 
 const deleteProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const product = await Product.findByIdAndDelete(id);
+    const product = await Product.findOneAndDelete({ _id: id, vendorId: req.user?._id });
 
     if (!product) {
         throw new ApiError(404, "Product not found");

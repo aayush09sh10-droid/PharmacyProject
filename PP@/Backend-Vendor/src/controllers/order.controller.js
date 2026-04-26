@@ -4,7 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { Order } from "../models/order.model.js";
 
 const createOrder = asyncHandler(async (req, res) => {
-    const { customerId, pharmacyId, items, totalAmount } = req.body;
+    const { customerId, pharmacyId, items, totalAmount, paymentMethod } = req.body;
 
     if (!customerId || !pharmacyId || !items || !totalAmount) {
         throw new ApiError(400, "All fields are required");
@@ -17,7 +17,8 @@ const createOrder = asyncHandler(async (req, res) => {
         customerId,
         pharmacyId,
         items,
-        totalAmount
+        totalAmount,
+        paymentMethod: paymentMethod || "Cash on Delivery"
     });
 
     return res.status(201).json(
@@ -26,7 +27,14 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 
 const getAllOrders = asyncHandler(async (req, res) => {
-    const orders = await Order.find().sort({ createdAt: -1 });
+    let filter = {};
+    
+    // If not internal (Backend-Admin), filter by logged-in vendor's ID
+    if (!req.isInternal && req.user) {
+        filter = { pharmacyId: req.user._id };
+    }
+
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
     return res.status(200).json(
         new ApiResponse(200, orders, "Orders fetched successfully")
     );

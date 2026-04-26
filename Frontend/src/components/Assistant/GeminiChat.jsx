@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Bot, Send, X, Minimize2, MessageCircle, Loader2 } from "lucide-react";
 
-const GEMINI_API_KEY = "AIzaSyBJFYrVLb76SCUKc5UKpG8RPLC-pN_KCdc";
 const MODEL_NAME = "gemini-1.5-flash"; // Standard stable flash model
 
 export default function GeminiChat() {
@@ -23,15 +22,25 @@ export default function GeminiChat() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
+    const apiKey = localStorage.getItem("gemini_api_key");
+    if (!apiKey) {
+      setMessages(prev => [...prev, { role: "user", content: input.trim() }]);
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: "I need a Gemini API key to function. Please ask the administrator to configure it in the Admin Settings." 
+      }]);
+      setInput("");
+      return;
+    }
+
     const userMessage = input.trim();
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
 
     try {
-      // Using verified gemini-2.5-flash model
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

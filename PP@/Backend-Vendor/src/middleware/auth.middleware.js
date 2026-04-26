@@ -4,6 +4,13 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
     try {
+        // Check for Internal API Key first (for Backend-Admin)
+        const apiKey = req.header("x-api-key");
+        if (apiKey && apiKey === process.env.INTERNAL_API_KEY) {
+            req.isInternal = true;
+            return next();
+        }
+
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
         
         if (!token) {
@@ -12,7 +19,6 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     
-        // We don't necessarily have the user in this DB, but we have their decoded info from the JWT
         req.user = decodedToken;
         next();
     } catch (error) {

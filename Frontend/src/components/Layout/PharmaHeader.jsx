@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { clearAuthSession, getStoredUser, logoutUser } from "../../services/auth.service.js";
+import { useCart } from "../../context/CartContext.jsx";
 
 function NavItem({ icon: Icon, label, active = false, onClick }) {
   return (
@@ -79,12 +80,15 @@ export default function PharmaHeader({
     setIsMobileMenuOpen(false);
   };
 
+  const { clearCart } = useCart();
+
   const handleCustomerLogout = async () => {
     try {
       await logoutUser();
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
+      clearCart();
       clearAuthSession();
       setCurrentUser(null);
       setIsMobileMenuOpen(false);

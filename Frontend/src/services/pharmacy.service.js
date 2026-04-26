@@ -15,12 +15,14 @@ export async function compareMedicinePrices(name, lng, lat) {
 }
 
 export async function placeOrder(orderData) {
-    const response = await fetch(`${BASE_URL}/api/v1/orders`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(orderData)
-    });
-    return handleResponse(response);
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`${BASE_URL}/api/v1/orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(orderData),
+  });
+  return handleResponse(response);
 }

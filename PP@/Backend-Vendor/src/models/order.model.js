@@ -49,6 +49,11 @@ const orderSchema = new Schema(
             type: String,
             enum: ["Paid", "Unpaid", "Refunded"],
             default: "Unpaid"
+        },
+        paymentMethod: {
+            type: String,
+            enum: ["Cash on Delivery", "Online"],
+            default: "Cash on Delivery"
         }
     },
     {

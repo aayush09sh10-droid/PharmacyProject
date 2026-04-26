@@ -10,7 +10,7 @@ import { placeOrder } from "../../services/pharmacy.service.js";
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { cartItems, removeFromCart, clearCart, totalAmount } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, clearCart, totalAmount } = useCart();
   const user = getStoredUser();
   const isCustomerLoggedIn = Boolean(user && (user.role === "User" || user.role === "Customer"));
   const [isOrdering, setIsOrdering] = useState(false);
@@ -40,7 +40,8 @@ export default function CartPage() {
           quantity: item.quantity,
           price: item.price
         })),
-        totalAmount: totalAmount
+        totalAmount: totalAmount,
+        paymentMethod: "Cash on Delivery"
       };
 
       await placeOrder(orderData);
@@ -62,9 +63,12 @@ export default function CartPage() {
             <CheckCircle size={48} />
           </div>
           <h1 className="text-4xl font-black text-slate-800 mb-4 tracking-tight">Order Confirmed!</h1>
-          <p className="text-slate-500 font-medium text-lg leading-relaxed mb-10">
+          <p className="text-slate-500 font-bold text-lg leading-relaxed mb-4">
             Thank you for choosing PharmaCare. Your medicine order has been sent to the pharmacy and is being prepared for delivery.
           </p>
+          <div className="mb-10 p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold">
+             Payment Method: <span className="font-black">Cash on Delivery (COD)</span>
+          </div>
           <button 
             onClick={() => navigate("/")}
             className="w-full bg-emerald-600 text-white font-black py-5 rounded-2xl text-xl shadow-lg hover:bg-emerald-700 transition flex items-center justify-center gap-3"
@@ -107,7 +111,21 @@ export default function CartPage() {
                       <h3 className="font-black text-xl text-slate-800">{item.name}</h3>
                       <p className="text-sm text-emerald-600 font-black uppercase tracking-widest">{item.pharmacyName}</p>
                       <div className="mt-2 flex items-center gap-4">
-                        <span className="text-slate-500 font-bold">Qty: {item.quantity}</span>
+                        <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
+                          <button 
+                            onClick={() => updateQuantity(item._id, item.pharmacyId, -1)}
+                            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-white transition text-slate-600 font-black"
+                          >
+                            -
+                          </button>
+                          <span className="w-8 text-center font-black text-slate-800">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateQuantity(item._id, item.pharmacyId, 1)}
+                            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-white transition text-slate-600 font-black"
+                          >
+                            +
+                          </button>
+                        </div>
                         <span className="text-slate-300">|</span>
                         <span className="text-emerald-700 font-black flex items-center gap-0.5">
                           <IndianRupee size={16} />{item.price} each
